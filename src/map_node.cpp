@@ -9,6 +9,4 @@ MapNode::MapNode(string name, MapNode *next_left, MapNode *next_right, unsigned 
 
 MapNode::~MapNode() {
     cout << "destroying " << name << endl;
-    delete next_left;
-    delete next_right;
 }
