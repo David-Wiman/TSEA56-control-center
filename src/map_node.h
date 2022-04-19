@@ -3,6 +3,10 @@
 class MapNode {
 public:
     MapNode(std::string name, MapNode *next_left, MapNode *next_right, unsigned int weight = __INT_MAX__);
+
+    MapNode(const MapNode&) = delete;
+    MapNode operator=(const MapNode&) = delete;
+
     ~MapNode();
     void set_weight(int w) {
         weight = w;
@@ -20,8 +24,7 @@ public:
 
 private:
     std::string name;
-    unsigned int weight;
     MapNode *next_left;
     MapNode *next_right;
-
+    unsigned int weight;
 };
