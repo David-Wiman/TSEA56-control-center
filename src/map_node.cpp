@@ -10,3 +10,11 @@ MapNode::MapNode(string name, MapNode *next_left, MapNode *next_right, unsigned 
 MapNode::~MapNode() {
     cout << "destroying " << name << endl;
 }
+
+bool MapNode::operator==(MapNode const &rhs) const {
+    if (name != rhs.name)
+        return false;
+    if (weight != rhs.weight)
+        return false;
+    return true;
+}

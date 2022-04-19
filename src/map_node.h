@@ -3,21 +3,23 @@
 class MapNode {
 public:
     MapNode(std::string name, MapNode *next_left, MapNode *next_right, unsigned int weight = __INT_MAX__);
-
-    MapNode(const MapNode&) = delete;
-    MapNode operator=(const MapNode&) = delete;
-
     ~MapNode();
+
+    MapNode(MapNode const&) = delete;
+    MapNode operator=(MapNode const&) = delete;
+
+    bool operator==(MapNode const &other) const;
+
     void set_weight(int w) {
         weight = w;
     }
-    unsigned int get_weight() {
+    unsigned int get_weight() const {
         return weight;
     }
-    MapNode* get_next_left() {
+    MapNode* get_next_left() const {
         return next_left;
     }
-     MapNode* get_next_right() {
+     MapNode* get_next_right() const {
         return next_right;
     }
 

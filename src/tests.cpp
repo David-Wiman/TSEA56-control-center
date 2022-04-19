@@ -25,4 +25,12 @@ TEST_CASE("Map Node") {
         node1.set_weight(8);
         CHECK(node1.get_weight() == 8);
     }
+    SECTION("Get next") {
+        MapNode node1{"1", nullptr, nullptr};
+        MapNode node2{"2", &node1, nullptr, 34};
+        MapNode node3{"3", &node1, &node2};
+
+        CHECK(*node2.get_next_left() == node1);
+        //CHECK(node2.get_next_right() != node1);
+    }
 }
