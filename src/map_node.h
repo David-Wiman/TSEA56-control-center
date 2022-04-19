@@ -21,7 +21,6 @@ public:
         return next_right;
     }
 
-
 private:
     std::string name;
     MapNode *next_left;
