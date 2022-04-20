@@ -50,7 +50,9 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(0, 200);
+        control_center(STOP_DISTANCE-10, 200);
+        CHECK(control_center.get_state() == control::stoped_at_obstacle);
+        control_center(STOP_DISTANCE+10, 200);
         CHECK(control_center.get_state() == control::running);
 
         vector<int> obstacle_distances{0, 0, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2};
@@ -64,6 +66,9 @@ TEST_CASE("Control Center") {
                 CHECK(control_center.get_state() == control::stoped_at_obstacle);
             }
         }
+    }
+    SECTION("Removed obstacle, restart") {
+
     }
 
 }

@@ -7,6 +7,7 @@
 #include <list>
 
 #define DEFAULT_SPEED 10
+#define STOP_DISTANCE 30
 
 namespace control {
 
