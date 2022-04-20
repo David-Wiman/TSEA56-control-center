@@ -1,3 +1,6 @@
+#ifndef MAP_NODE_H
+#define MAP_NODE_H
+
 #include <iostream>
 
 class MapNode {
@@ -29,3 +32,5 @@ private:
     MapNode *next_right;
     unsigned int weight;
 };
+
+#endif // MAP_NODE_H
