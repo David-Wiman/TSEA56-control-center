@@ -62,12 +62,33 @@ TEST_CASE("Control Center") {
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200);
             if (distance == 0 || distance > STOP_DISTANCE) {
-                cout << distance << endl;
                 CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
             } else {
                 CHECK(ref.speed == 0);
                 CHECK(control_center.get_state() == control::stoped_at_obstacle);
+            }
+        }
+    }
+    SECTION("Stop-line detection") {
+        ControlCenter control_center{};
+        CHECK(control_center.get_state() == control::stoped_at_node);
+        drive_instruction_t instr{control::left, 1};
+        control_center.add_drive_instruction(instr);
+        control_center(STOP_DISTANCE-10, 200);
+        CHECK(control_center.get_state() == control::stoped_at_obstacle);
+        control_center(STOP_DISTANCE+10, 200);
+        CHECK(control_center.get_state() == control::running);
+
+        vector<int> stop_line_distance{-1, -1, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2, -1};
+        for (auto distance : stop_line_distance) {
+            reference_t ref = control_center(0, distance);
+            if (distance == 0 || distance > STOP_DISTANCE) {
+                CHECK(ref.speed == DEFAULT_SPEED);
+                CHECK(control_center.get_state() == control::running);
+            } else {
+                CHECK(ref.speed == 0);
+                CHECK(control_center.get_state() == control::stoped_at_node);
             }
         }
     }

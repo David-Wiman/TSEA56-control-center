@@ -32,6 +32,20 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
     reference_t reference = {0, 0};
     switch (state) {
         case control::running:
+            if ((obstacle_distance <= STOP_DISTANCE) && (obstacle_distance != 0)) {
+                // The path is blocked
+                state = control::stoped_at_obstacle;
+                reference.lateral_position = 0;
+                reference.speed = 0;
+            } else if ((stop_distance <= STOP_DISTANCE) && (stop_distance != -1)) {
+                // At node
+                state = control::stoped_at_node;
+                reference.lateral_position = 0;
+                reference.speed = 0;
+            } else {
+                reference.lateral_position = 0;
+                reference.speed = DEFAULT_SPEED;
+            }
             break;
 
         case control::running_in_intersection:
@@ -39,20 +53,24 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
 
         case control::stoped_at_node:
             if (drive_instructions.empty()) {
+                // No instruction
                 reference.lateral_position = 0;
                 reference.speed = 0;
             } else {
                 drive_instruction_t instr = drive_instructions.front();
                 if (instr.instruction == control::stop) {
+                    // Instruction says stop
                     _finished_instruction = true;
                     reference.lateral_position = 0;
                     reference.speed = 0;
                 } else {
                     if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
+                        // The path isn't blocked
                         state = control::running;
                         reference.lateral_position = 0;
                         reference.speed = DEFAULT_SPEED;
                     } else {
+                        // The path is blocked
                         state = control::stoped_at_obstacle;
                         reference.lateral_position = 0;
                         reference.speed = 0;
@@ -63,10 +81,12 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
 
         case control::stoped_at_obstacle:
             if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
+                // The path isn't blocked
                 state = control::running;
                 reference.lateral_position = 0;
                 reference.speed = DEFAULT_SPEED;
             } else {
+                // The path is blocked
                 reference.lateral_position = 0;
                 reference.speed = 0;
             }
