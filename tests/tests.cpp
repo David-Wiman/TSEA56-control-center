@@ -87,6 +87,7 @@ TEST_CASE("Control Center") {
                 CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
             } else {
+                cout << "state: " << control_center.get_state() << ", speed: " << ref.speed << endl;
                 CHECK(ref.speed == 0);
                 CHECK(control_center.get_state() == control::stoped_at_node);
             }

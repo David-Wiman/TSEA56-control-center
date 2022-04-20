@@ -34,15 +34,20 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
         case control::running:
             if ((obstacle_distance <= STOP_DISTANCE) && (obstacle_distance != 0)) {
                 // The path is blocked
+                cout << "path blocked" << endl;
                 state = control::stoped_at_obstacle;
                 reference.lateral_position = 0;
                 reference.speed = 0;
             } else if ((stop_distance <= STOP_DISTANCE) && (stop_distance != -1)) {
                 // At node
+                cout << "at node" << endl;
                 state = control::stoped_at_node;
+                _finished_instruction = true;
                 reference.lateral_position = 0;
                 reference.speed = 0;
             } else {
+                // Clear path
+                cout << "clear path" << endl;
                 reference.lateral_position = 0;
                 reference.speed = DEFAULT_SPEED;
             }
@@ -58,9 +63,8 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                 reference.speed = 0;
             } else {
                 drive_instruction_t instr = drive_instructions.front();
-                if (instr.instruction == control::stop) {
+                if ((instr.instruction == control::stop) || ((stop_distance <= STOP_DISTANCE) && (stop_distance != -1))) {
                     // Instruction says stop
-                    _finished_instruction = true;
                     reference.lateral_position = 0;
                     reference.speed = 0;
                 } else {
