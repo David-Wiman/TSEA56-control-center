@@ -39,29 +39,29 @@ TEST_CASE("Map Node") {
 TEST_CASE("Control Center") {
     SECTION("Basics") {
         ControlCenter control_center{};
-        CHECK(control_center.get_state() == instructions::stoped_at_node);
-        drive_intstruction_t instr{instructions::left, 1};
+        CHECK(control_center.get_state() == control::stoped_at_node);
+        drive_intstruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
         control_center(0, 200);
-        CHECK(control_center.get_state() == instructions::running);
+        CHECK(control_center.get_state() == control::running);
     }
     SECTION("Obstacle detection") {
         ControlCenter control_center{};
-        CHECK(control_center.get_state() == instructions::stoped_at_node);
-        drive_intstruction_t instr{instructions::left, 1};
+        CHECK(control_center.get_state() == control::stoped_at_node);
+        drive_intstruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
         control_center(0, 200);
-        CHECK(control_center.get_state() == instructions::running);
+        CHECK(control_center.get_state() == control::running);
 
         vector<int> obstacle_distances{0, 0, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2};
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200);
             if (distance == 0 || distance > 50) {
                 CHECK(ref.speed > 0);
-                CHECK(control_center.get_state() == instructions::running);
+                CHECK(control_center.get_state() == control::running);
             } else {
                 CHECK(ref.speed == 0);
-                CHECK(control_center.get_state() == instructions::stoped_at_obstacle);
+                CHECK(control_center.get_state() == control::stoped_at_obstacle);
             }
         }
     }

@@ -5,7 +5,7 @@
 #include <string>
 
 ControlCenter::ControlCenter()
-: obstacle_distance_buffer{}, stop_distance_buffer{}, state{instructions::stoped_at_node}  {
+: obstacle_distance_buffer{}, stop_distance_buffer{}, state{control::stoped_at_node}  {
     
 }
 
@@ -41,6 +41,6 @@ int ControlCenter::get_finished_instruction_id() {
     return 0;
 }
 
-enum instructions::ControlState ControlCenter::get_state() {
+enum control::ControlState ControlCenter::get_state() {
     return state;
 }

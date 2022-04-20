@@ -6,14 +6,14 @@
 #include <string>
 #include <list>
 
-namespace instructions {
+namespace control {
 
     enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
     enum Instruction {left, forward, right, stop};
 }
 
 typedef struct DriveInstruction {
-    enum instructions::Instruction instruction;
+    enum control::Instruction instruction;
     int id;
 } drive_intstruction_t;
 
@@ -35,14 +35,14 @@ public:
 
     std::string get_position();
     int get_finished_instruction_id();
-    enum instructions::ControlState get_state();
+    enum control::ControlState get_state();
 
 private:
     //MapGraph map;
     std::list<int> obstacle_distance_buffer;
     std::list<int> stop_distance_buffer;
-    enum instructions::ControlState state;
-    enum instructions::Instruction instruction;
+    enum control::ControlState state;
+    enum control::Instruction instruction;
     int finished_instruction_id = -1;
     std::list<drive_intstruction_t> drive_instruction;
 };
