@@ -6,6 +6,8 @@
 #include <string>
 #include <list>
 
+#define DEFAULT_SPEED 10
+
 namespace control {
 
     enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
@@ -15,7 +17,7 @@ namespace control {
 typedef struct DriveInstruction {
     enum control::Instruction instruction;
     int id;
-} drive_intstruction_t;
+} drive_instruction_t;
 
 typedef struct ReferenceValues {
     int lateral_position;
@@ -29,7 +31,7 @@ public:
     void set_position(MapNode* mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
-    void add_drive_instruction(drive_intstruction_t drive_instruction);
+    void add_drive_instruction(drive_instruction_t drive_instruction);
     reference_t operator()(int obstacle_distance, int stop_distance);
     bool finished_instruction();
 
@@ -42,9 +44,8 @@ private:
     std::list<int> obstacle_distance_buffer;
     std::list<int> stop_distance_buffer;
     enum control::ControlState state;
-    enum control::Instruction instruction;
-    int finished_instruction_id = -1;
-    std::list<drive_intstruction_t> drive_instruction;
+    std::list<drive_instruction_t> drive_instructions;
+    bool _finished_instruction;
 };
 
 #endif // CONTROLCENTER_H

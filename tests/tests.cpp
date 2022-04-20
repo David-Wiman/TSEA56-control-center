@@ -40,7 +40,7 @@ TEST_CASE("Control Center") {
     SECTION("Basics") {
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
-        drive_intstruction_t instr{control::left, 1};
+        drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
         control_center(0, 200);
         CHECK(control_center.get_state() == control::running);
@@ -48,7 +48,7 @@ TEST_CASE("Control Center") {
     SECTION("Obstacle detection") {
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
-        drive_intstruction_t instr{control::left, 1};
+        drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
         control_center(0, 200);
         CHECK(control_center.get_state() == control::running);
@@ -57,7 +57,7 @@ TEST_CASE("Control Center") {
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200);
             if (distance == 0 || distance > 50) {
-                CHECK(ref.speed > 0);
+                CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
             } else {
                 CHECK(ref.speed == 0);
