@@ -5,7 +5,7 @@
 #include <string>
 
 ControlCenter::ControlCenter()
-: obstacle_distance_buffer{}, stop_distance_buffer{}, state{stoped_at_node}  {
+: obstacle_distance_buffer{}, stop_distance_buffer{}, state{instructions::stoped_at_node}  {
     
 }
 
@@ -21,9 +21,9 @@ void ControlCenter::set_drive_mission(std::list<MapNode*> drive_mission) {
 
 }
 
-/*void ControlCenter::add_drive_instruction(SemiDriveInstruction semi_drive_instruction) {
+void ControlCenter::add_drive_instruction(drive_intstruction_t drive_instruction) {
 
-}*/
+}
 
 void ControlCenter::process(int obstacle_distance, int stop_distance) {
 

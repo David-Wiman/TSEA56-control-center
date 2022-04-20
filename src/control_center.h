@@ -6,13 +6,16 @@
 #include <string>
 #include <list>
 
-enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
-enum Instruction {left, forward, right, stop};
+namespace instructions {
 
-struct DriveInstruction {
-    enum Instruction instruction;
+    enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
+    enum Instruction {left, forward, right, stop};
+}
+
+typedef struct DriveInstruction {
+    enum instructions::Instruction instruction;
     int id;
-} drive_intstruction_t
+} drive_intstruction_t;
 
 class ControlCenter {
 public:
@@ -21,7 +24,7 @@ public:
     void set_position(MapNode* mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
-    //void add_drive_instruction(SemiDriveInstruction semidriveinstruction);
+    void add_drive_instruction(drive_intstruction_t drive_instruction);
     void process(int obstacle_distance, int stop_distance);
     bool finished_instruction();
 
@@ -32,8 +35,10 @@ private:
     //MapGraph map;
     std::list<int> obstacle_distance_buffer;
     std::list<int> stop_distance_buffer;
-    enum ControlState state;
+    enum instructions::ControlState state;
+    enum instructions::Instruction instruction;
     int finished_instruction_id = -1;
+    std::list<drive_intstruction_t> drive_instruction;
 };
 
 #endif // CONTROLCENTER_H

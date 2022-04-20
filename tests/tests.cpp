@@ -39,6 +39,8 @@ TEST_CASE("Map Node") {
 TEST_CASE("Control Center") {
     SECTION("Basics") {
         ControlCenter control_center{};
+        drive_intstruction_t instr{instructions::left, 1};
+        control_center.add_drive_instruction(instr);
     }
 
 }
