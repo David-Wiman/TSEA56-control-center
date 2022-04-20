@@ -17,6 +17,11 @@ typedef struct DriveInstruction {
     int id;
 } drive_intstruction_t;
 
+typedef struct ReferenceValues {
+    int lateral_position;
+    int speed;
+} reference_t;
+
 class ControlCenter {
 public:
     ControlCenter();
@@ -25,11 +30,12 @@ public:
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
     void add_drive_instruction(drive_intstruction_t drive_instruction);
-    void process(int obstacle_distance, int stop_distance);
+    reference_t operator()(int obstacle_distance, int stop_distance);
     bool finished_instruction();
 
     std::string get_position();
     int get_finished_instruction_id();
+    enum instructions::ControlState get_state();
 
 private:
     //MapGraph map;

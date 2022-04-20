@@ -25,8 +25,8 @@ void ControlCenter::add_drive_instruction(drive_intstruction_t drive_instruction
 
 }
 
-void ControlCenter::process(int obstacle_distance, int stop_distance) {
-
+reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) {
+    return {0,0};
 }
 
 bool ControlCenter::finished_instruction() {
@@ -39,4 +39,8 @@ std::string ControlCenter::get_position() {
 
 int ControlCenter::get_finished_instruction_id() {
     return 0;
+}
+
+enum instructions::ControlState ControlCenter::get_state() {
+    return state;
 }
