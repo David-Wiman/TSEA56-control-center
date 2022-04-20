@@ -2,7 +2,10 @@
 #include "map_node.h"
 #include "control_center.h"
 
+#include <iostream>
+
 using namespace std;
+
 TEST_CASE("Map Node") {
     SECTION("Constructors") {
         MapNode node1{"1", nullptr, nullptr};
@@ -55,10 +58,11 @@ TEST_CASE("Control Center") {
         control_center(STOP_DISTANCE+10, 200);
         CHECK(control_center.get_state() == control::running);
 
-        vector<int> obstacle_distances{0, 0, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2};
+        vector<int> obstacle_distances{0, 0, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2, 0};
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200);
-            if (distance == 0 || distance > 50) {
+            if (distance == 0 || distance > STOP_DISTANCE) {
+                cout << distance << endl;
                 CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
             } else {

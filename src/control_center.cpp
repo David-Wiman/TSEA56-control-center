@@ -48,14 +48,28 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                     reference.lateral_position = 0;
                     reference.speed = 0;
                 } else {
-                    state = control::running;
-                    reference.lateral_position = 0;
-                    reference.speed = DEFAULT_SPEED;
+                    if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
+                        state = control::running;
+                        reference.lateral_position = 0;
+                        reference.speed = DEFAULT_SPEED;
+                    } else {
+                        state = control::stoped_at_obstacle;
+                        reference.lateral_position = 0;
+                        reference.speed = 0;
+                    }
                 }
             }
             break;
 
         case control::stoped_at_obstacle:
+            if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
+                state = control::running;
+                reference.lateral_position = 0;
+                reference.speed = DEFAULT_SPEED;
+            } else {
+                reference.lateral_position = 0;
+                reference.speed = 0;
+            }
             break;
 
         default: 
