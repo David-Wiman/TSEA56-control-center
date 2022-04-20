@@ -6,7 +6,13 @@
 #include <string>
 #include <list>
 
-enum ControlStates {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
+enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
+enum Instruction {left, forward, right, stop};
+
+struct DriveInstruction {
+    enum Instruction instruction;
+    int id;
+} drive_intstruction_t
 
 class ControlCenter {
 public:
@@ -26,7 +32,7 @@ private:
     //MapGraph map;
     std::list<int> obstacle_distance_buffer;
     std::list<int> stop_distance_buffer;
-    enum ControlStates state;
+    enum ControlState state;
     int finished_instruction_id = -1;
 };
 

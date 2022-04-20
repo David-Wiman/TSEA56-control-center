@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "map_node.h"
+#include "control_center.h"
 
 using namespace std;
 TEST_CASE("Map Node") {
@@ -33,4 +34,11 @@ TEST_CASE("Map Node") {
         CHECK(*node2.get_next_left() == node1);
         //CHECK(node2.get_next_right() != node1);
     }
+}
+
+TEST_CASE("Control Center") {
+    SECTION("Basics") {
+        ControlCenter control_center{};
+    }
+
 }
