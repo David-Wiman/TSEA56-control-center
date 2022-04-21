@@ -113,7 +113,7 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
             }
             break;
 
-        default: 
+        default:
             cout << "Error: control center in unknown state" << endl;
     }
     return reference;
@@ -140,6 +140,7 @@ bool ControlCenter::at_stop_line(int stop_distance) {
 }
 
 void ControlCenter::finish_instruction() {
+    cout << "Finish instruction" << endl;
     int id = drive_instructions.front().id;
     drive_instructions.pop_front();
     finished_id_buffer.push_back(id);
@@ -150,7 +151,13 @@ std::string ControlCenter::get_position() {
 }
 
 int ControlCenter::get_finished_instruction_id() {
-    return 0;
+    if (finished_id_buffer.empty()) {
+        return 0;
+    } else {
+        int id = finished_id_buffer.front();
+        finished_id_buffer.pop_front();
+        return id;
+    }
 }
 
 enum control::ControlState ControlCenter::get_state() {

@@ -94,8 +94,22 @@ TEST_CASE("Control Center") {
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
     }
-    SECTION("Removed obstacle, restart") {
+    SECTION("Drive Instructions") {
+        ControlCenter control_center{};
+        reference_t ref{};
+        drive_instruction_t instr{control::forward, 1};
+        control_center.add_drive_instruction(instr);
 
+        ref = control_center(1000, 600);
+        CHECK(control_center.get_finished_instruction_id() == 0);
+
+        ref = control_center(1000, 500);
+        ref = control_center(1000, 300);
+        ref = control_center(1000, 200);
+        CHECK(control_center.get_finished_instruction_id() == 0);
+
+        ref = control_center(1000, STOP_DISTANCE_CLOSE);
+        CHECK(control_center.get_finished_instruction_id() == 1);
+        CHECK(control_center.get_finished_instruction_id() == 0);
     }
-
 }
