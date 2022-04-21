@@ -45,7 +45,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(0, 200);
+        control_center(1000, 200);
         CHECK(control_center.get_state() == control::running);
     }
     SECTION("Obstacle detection") {
@@ -53,15 +53,15 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(STOP_DISTANCE-10, 200);
+        control_center(STOP_DISTANCE_CLOSE-10, 200);
         CHECK(control_center.get_state() == control::stoped_at_obstacle);
-        control_center(STOP_DISTANCE+10, 200);
+        control_center(STOP_DISTANCE_CLOSE+10, 200);
         CHECK(control_center.get_state() == control::running);
 
-        vector<int> obstacle_distances{0, 0, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2, 0};
+        vector<int> obstacle_distances{1000, 1000, 100, 75, 60, 55, 30, 25, 15, 10, 2, 1000};
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200);
-            if (distance == 0 || distance > STOP_DISTANCE) {
+            if (distance > STOP_DISTANCE_CLOSE) {
                 CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
             } else {
@@ -75,23 +75,24 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(STOP_DISTANCE-10, 200);
+        control_center(STOP_DISTANCE_CLOSE-10, 200);
         CHECK(control_center.get_state() == control::stoped_at_obstacle);
-        control_center(STOP_DISTANCE+10, 200);
+        control_center(STOP_DISTANCE_CLOSE+10, 200);
         CHECK(control_center.get_state() == control::running);
 
-        vector<int> stop_line_distance{-1, -1, 100, 95, 75, 60, 55, 30, 25, 15, 10, 2, -1};
-        for (auto distance : stop_line_distance) {
-            reference_t ref = control_center(0, distance);
-            if (distance == 0 || distance > STOP_DISTANCE) {
-                CHECK(ref.speed == DEFAULT_SPEED);
-                CHECK(control_center.get_state() == control::running);
-            } else {
-                cout << "state: " << control_center.get_state() << ", speed: " << ref.speed << endl;
-                CHECK(ref.speed == 0);
-                CHECK(control_center.get_state() == control::stoped_at_node);
-            }
-        }
+        int distance{-1};
+        reference_t ref = control_center(1000, distance);
+        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(control_center.get_state() == control::running);
+        distance = 100;
+        ref = control_center(1000, distance);
+        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(control_center.get_state() == control::running);
+
+        distance = 30;
+        ref = control_center(1000, distance);
+        CHECK(ref.speed == 0);
+        CHECK(control_center.get_state() == control::stoped_at_node);
     }
     SECTION("Removed obstacle, restart") {
 

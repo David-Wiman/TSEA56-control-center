@@ -7,7 +7,8 @@
 #include <list>
 
 #define DEFAULT_SPEED 10
-#define STOP_DISTANCE 30
+#define STOP_DISTANCE_CLOSE 30
+#define STOP_DISTANCE_FAR 100
 
 namespace control {
 
@@ -34,19 +35,27 @@ public:
 
     void add_drive_instruction(drive_instruction_t drive_instruction);
     reference_t operator()(int obstacle_distance, int stop_distance);
-    bool finished_instruction();
 
     std::string get_position();
+
+    /* Return 0 if no new instruction have been finished. */
     int get_finished_instruction_id();
     enum control::ControlState get_state();
 
 private:
+    void finish_instruction();
+
+    /* Return true if the car is at a stop line (which it have not been at 
+     * before), otherwise return false. */
+    bool at_stop_line(int stop_distance);
+
     //MapGraph map;
-    std::list<int> obstacle_distance_buffer;
-    std::list<int> stop_distance_buffer;
+    std::list<int> obstacle_distance_buffer{};
+    std::list<int> stop_distance_buffer{};
     enum control::ControlState state;
-    std::list<drive_instruction_t> drive_instructions;
-    bool _finished_instruction;
+    std::list<drive_instruction_t> drive_instructions{};
+    std::list<int> finished_id_buffer{};
+    bool have_stoped{false};
 };
 
 #endif // CONTROLCENTER_H

@@ -6,11 +6,7 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter()
-: obstacle_distance_buffer{}, stop_distance_buffer{},
-  state{control::stoped_at_node}, drive_instructions{}, _finished_instruction{false} {
-     
-}
+ControlCenter::ControlCenter(): state{control::stoped_at_node} {}
 
 /*void ControlCenter::set_new_map(MapGraph* map_graph) {
 
@@ -29,22 +25,47 @@ void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction)
 }
 
 reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) {
+    if (stop_distance == -1)
+        stop_distance = 1000;
+
+    cout << "Int stop_distance: " << stop_distance << endl;
     reference_t reference = {0, 0};
+    drive_instruction_t instr{};
+
+    if (drive_instructions.empty()) {
+        // No instruction
+        return reference;
+    } else {
+        instr = drive_instructions.front();
+    }
+    if (instr.instruction == control::stop) {
+        state = control::stoped_at_node;
+        finish_instruction();
+        reference.speed = 0;
+    }
+
     switch (state) {
         case control::running:
-            if ((obstacle_distance <= STOP_DISTANCE) && (obstacle_distance != 0)) {
+            if (obstacle_distance <= STOP_DISTANCE_CLOSE) {
                 // The path is blocked
                 cout << "path blocked" << endl;
                 state = control::stoped_at_obstacle;
                 reference.lateral_position = 0;
                 reference.speed = 0;
-            } else if ((stop_distance <= STOP_DISTANCE) && (stop_distance != -1)) {
+            } else if (at_stop_line(stop_distance)) {
                 // At node
                 cout << "at node" << endl;
-                state = control::stoped_at_node;
-                _finished_instruction = true;
-                reference.lateral_position = 0;
-                reference.speed = 0;
+                finish_instruction();
+                if (drive_instructions.empty()) {
+                    // Stop
+                    state = control::stoped_at_node;
+                    reference.lateral_position = 0;
+                    reference.speed = 0;
+                } else {
+                    // More instructions, continue driving
+                    reference.lateral_position = 0;
+                    reference.speed = DEFAULT_SPEED;
+                }
             } else {
                 // Clear path
                 cout << "clear path" << endl;
@@ -54,43 +75,39 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
             break;
 
         case control::running_in_intersection:
+            // TODO
             break;
 
         case control::stoped_at_node:
-            if (drive_instructions.empty()) {
-                // No instruction
-                reference.lateral_position = 0;
-                reference.speed = 0;
-            } else {
-                drive_instruction_t instr = drive_instructions.front();
-                if ((instr.instruction == control::stop) || ((stop_distance <= STOP_DISTANCE) && (stop_distance != -1))) {
-                    // Instruction says stop
+            if (obstacle_distance > STOP_DISTANCE_CLOSE) {
+                // The path isn't blocked
+                if (at_stop_line(stop_distance)) {
+                    cout << "Error: Still at stop line" << endl;
                     reference.lateral_position = 0;
                     reference.speed = 0;
                 } else {
-                    if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
-                        // The path isn't blocked
-                        state = control::running;
-                        reference.lateral_position = 0;
-                        reference.speed = DEFAULT_SPEED;
-                    } else {
-                        // The path is blocked
-                        state = control::stoped_at_obstacle;
-                        reference.lateral_position = 0;
-                        reference.speed = 0;
-                    }
+                    // No new stop line close
+                    state = control::running;
+                    reference.lateral_position = 0;
+                    reference.speed = DEFAULT_SPEED;
                 }
+            } else {
+                // The path is blocked
+                state = control::stoped_at_obstacle;
+                reference.lateral_position = 0;
+                reference.speed = 0;
             }
             break;
 
         case control::stoped_at_obstacle:
-            if (obstacle_distance > STOP_DISTANCE || obstacle_distance == 0) {
-                // The path isn't blocked
+            if (obstacle_distance > STOP_DISTANCE_CLOSE) {
+                // The path is no longer blocked
+                cout << "INFO: Path no longer blocked" << endl;
                 state = control::running;
                 reference.lateral_position = 0;
                 reference.speed = DEFAULT_SPEED;
             } else {
-                // The path is blocked
+                // The path is still blocked
                 reference.lateral_position = 0;
                 reference.speed = 0;
             }
@@ -102,8 +119,30 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
     return reference;
 }
 
-bool ControlCenter::finished_instruction() {
-    return false;
+bool ControlCenter::at_stop_line(int stop_distance) {
+    if (stop_distance >= STOP_DISTANCE_FAR) {
+        // Next stop line is very far away
+        have_stoped = false;
+        return false;
+    }
+    if (stop_distance <= STOP_DISTANCE_CLOSE) {
+        if (have_stoped) {
+            return false;
+        } else {
+            // We have not stoped at this line. Stop!
+            have_stoped = true;
+            return true;
+        }
+    } else {
+        // Stop distance is not close enough to stop
+        return false;
+    }
+}
+
+void ControlCenter::finish_instruction() {
+    int id = drive_instructions.front().id;
+    drive_instructions.pop_front();
+    finished_id_buffer.push_back(id);
 }
 
 std::string ControlCenter::get_position() {
