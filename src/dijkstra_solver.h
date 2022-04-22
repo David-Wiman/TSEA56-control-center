@@ -2,6 +2,7 @@
 #define DIJKSTRA_SOLVER_H
 
 #include "map_node.h"
+#include "map_graph.h"
 
 #include <list>
 #include <string>
@@ -11,11 +12,15 @@ public:
     DijkstraSolver();
     ~DijkstraSolver();
 
-    void update_map(MapGraph *map_graph);
-    std::list<MapNode*> solve(std::string name);
+    DijkstraSolver(DijkstraSolver const&) = delete;
+    DijkstraSolver operator=(DijkstraSolver const&) = delete;
+
+    void update_map(MapGraph map_graph);
+    std::list<MapNode*> solve(std::string start_node);
 
 private:
-    MapGraph *map_graph;
+    void initiate_map_graph(std::string start_node);
+    MapGraph map_graph;
 
 };
 
