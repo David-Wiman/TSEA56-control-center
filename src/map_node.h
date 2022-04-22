@@ -2,10 +2,21 @@
 #define MAP_NODE_H
 
 #include <iostream>
+#include <climits>
+
+/* To stop errors...*/
+class MapNode;
+
+struct Edge {
+    int weight = INT_MAX;
+    MapNode* node = nullptr;
+};
 
 class MapNode {
 public:
-    MapNode(std::string name, MapNode *next_left, MapNode *next_right, unsigned int weight = __INT_MAX__);
+    MapNode(std::string name, unsigned int weight = __INT_MAX__);
+    void set_left(int edge_weight, MapNode* node);
+    void set_right(int edge_weight, MapNode* node);
     ~MapNode();
 
     MapNode(MapNode const&) = delete;
@@ -19,17 +30,20 @@ public:
     unsigned int get_weight() const {
         return weight;
     }
-    MapNode* get_next_left() const {
-        return next_left;
+    Edge get_left() const {
+        return left;
     }
-     MapNode* get_next_right() const {
-        return next_right;
+    Edge get_right() const {
+        return right;
+    }
+    std::string get_name() const {
+        return name;
     }
 
 private:
     std::string name;
-    MapNode *next_left;
-    MapNode *next_right;
+    Edge left;
+    Edge right;
     unsigned int weight;
 };
 

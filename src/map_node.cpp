@@ -4,8 +4,18 @@
 
 using namespace std;
 
-MapNode::MapNode(string name, MapNode *next_left, MapNode *next_right, unsigned int weight)
-: name{name}, next_left{next_left}, next_right{next_right}, weight{weight} {}
+MapNode::MapNode(string name, unsigned int weight)
+: name{name}, left{}, right{}, weight{weight} {}
+
+void MapNode::set_left(int edge_weight, MapNode* node) {
+    left.weight = edge_weight;
+    left.node = node;
+}
+
+void MapNode::set_right(int edge_weight, MapNode* node) {
+    right.weight = edge_weight;
+    right.node = node;
+}
 
 MapNode::~MapNode() {
     cout << "destroying " << name << endl;
