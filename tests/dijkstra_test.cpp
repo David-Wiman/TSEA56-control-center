@@ -3,14 +3,14 @@
 #include "map_node.h"
 
 #include <string>
-#include <json.hpp>
-
+#include <nlohmann/json.hpp>
 
 using namespace std;
 using json = nlohmann::json;
 
+/*
 int main() {
-    solver = DijkstraSolver();
+    DijkstraSolver solver{};
     string map_string = "{\"MapGraph\": {\"A1\": 2}, {\"B2\": 3}}";
 
     json json_map{};
@@ -20,9 +20,12 @@ int main() {
         return -1;
     }
 
-    map_graph = MapGraph(json_map);
+    MapGraph map_graph(json_map);
+
+    solver.update_map(map_graph);
 
     list<MapNode*> optimal_route = solver.solve("A1");
-
+    
     return 0;
 }
+*/
