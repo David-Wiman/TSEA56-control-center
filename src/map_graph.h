@@ -4,14 +4,18 @@
 #include "map_node.h"
 
 #include <list>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class MapGraph {
 public:
     MapGraph();
-    //MapGraph(json map_graph);
+    MapGraph(json map_graph);
 
 private:
-    friend std::list<MapNode*> nodes;
+    std::list<MapNode*> nodes;
+    friend class DijkstraSolver;
 
 };
 
