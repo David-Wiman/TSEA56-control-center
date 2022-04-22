@@ -22,8 +22,9 @@ typedef struct DriveInstruction {
 } drive_instruction_t;
 
 typedef struct ReferenceValues {
-    int lateral_position;
     int speed;
+    int angle;
+    int drive_mode;
 } reference_t;
 
 class ControlCenter {
@@ -34,7 +35,11 @@ public:
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
     void add_drive_instruction(drive_instruction_t drive_instruction);
-    reference_t operator()(int obstacle_distance, int stop_distance);
+
+    /* The control center is callable. It must be called every program cycle. */
+    reference_t operator()(
+            int obstacle_distance, int stop_distance, int left_angle, 
+            int right_angle, int image_processing_status_code);
 
     std::string get_position();
 

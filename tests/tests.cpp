@@ -45,7 +45,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(1000, 200);
+        control_center(1000, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::running);
     }
     SECTION("Obstacle detection") {
@@ -53,14 +53,14 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(STOP_DISTANCE_CLOSE-10, 200);
+        control_center(STOP_DISTANCE_CLOSE-10, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::stoped_at_obstacle);
-        control_center(STOP_DISTANCE_CLOSE+10, 200);
+        control_center(STOP_DISTANCE_CLOSE+10, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::running);
 
         vector<int> obstacle_distances{1000, 1000, 100, 75, 60, 55, 30, 25, 15, 10, 2, 1000};
         for (auto distance : obstacle_distances) {
-            reference_t ref = control_center(distance, 200);
+            reference_t ref = control_center(distance, 200, 0, 0, 0);
             if (distance > STOP_DISTANCE_CLOSE) {
                 CHECK(ref.speed == DEFAULT_SPEED);
                 CHECK(control_center.get_state() == control::running);
@@ -75,22 +75,22 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
         drive_instruction_t instr{control::left, 1};
         control_center.add_drive_instruction(instr);
-        control_center(STOP_DISTANCE_CLOSE-10, 200);
+        control_center(STOP_DISTANCE_CLOSE-10, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::stoped_at_obstacle);
-        control_center(STOP_DISTANCE_CLOSE+10, 200);
+        control_center(STOP_DISTANCE_CLOSE+10, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::running);
 
         int distance{-1};
-        reference_t ref = control_center(1000, distance);
+        reference_t ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
         distance = 100;
-        ref = control_center(1000, distance);
+        ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
         distance = 30;
-        ref = control_center(1000, distance);
+        ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
     }
@@ -100,15 +100,15 @@ TEST_CASE("Control Center") {
         drive_instruction_t instr{control::forward, 1};
         control_center.add_drive_instruction(instr);
 
-        ref = control_center(1000, 600);
+        ref = control_center(1000, 600, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
 
-        ref = control_center(1000, 500);
-        ref = control_center(1000, 300);
-        ref = control_center(1000, 200);
+        ref = control_center(1000, 500, 0, 0, 0);
+        ref = control_center(1000, 300, 0, 0, 0);
+        ref = control_center(1000, 200, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
 
-        ref = control_center(1000, STOP_DISTANCE_CLOSE);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 1);
         CHECK(control_center.get_finished_instruction_id() == 0);
     }
@@ -122,34 +122,34 @@ TEST_CASE("Control Center") {
         control_center.add_drive_instruction(instr);
 
         // Drive to next line
-        ref = control_center(1000, 200);
+        ref = control_center(1000, 200, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
         // At line, but don't stop. Continue til next line
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 1);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 20);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 20, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
-        ref = control_center(1000, STOP_DISTANCE_FAR + 10);
+        ref = control_center(1000, STOP_DISTANCE_FAR + 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
         // At line, stop
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 2);
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
 
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
@@ -160,18 +160,18 @@ TEST_CASE("Control Center") {
         control_center.add_drive_instruction(instr);
 
         // Drive to next line
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
-        ref = control_center(1000, STOP_DISTANCE_FAR + 10);
+        ref = control_center(1000, STOP_DISTANCE_FAR + 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 0);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
         // At line, stop
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == 3);
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);

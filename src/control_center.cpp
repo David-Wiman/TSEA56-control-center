@@ -24,12 +24,14 @@ void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction)
     drive_instructions.push_back(drive_instruction);
 }
 
-reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) {
+reference_t ControlCenter::operator()(
+        int obstacle_distance, int stop_distance,
+        int left_angle, int right_angle, int image_processing_status_code) {
     if (stop_distance == -1)
         stop_distance = 1000;
 
     cout << "Int stop_distance: " << stop_distance << endl;
-    reference_t reference = {0, 0};
+    reference_t reference = {0, 0, 1};
     drive_instruction_t instr{};
 
     if (drive_instructions.empty()) {
@@ -50,7 +52,7 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                 // The path is blocked
                 cout << "path blocked" << endl;
                 state = control::stoped_at_obstacle;
-                reference.lateral_position = 0;
+                reference.angle = 0;
                 reference.speed = 0;
             } else if (at_stop_line(stop_distance)) {
                 // At node
@@ -59,17 +61,17 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                 if (drive_instructions.empty()) {
                     // Stop
                     state = control::stoped_at_node;
-                    reference.lateral_position = 0;
+                    reference.angle = 0;
                     reference.speed = 0;
                 } else {
                     // More instructions, continue driving
-                    reference.lateral_position = 0;
+                    reference.angle = 0;
                     reference.speed = DEFAULT_SPEED;
                 }
             } else {
                 // Clear path
                 cout << "clear path" << endl;
-                reference.lateral_position = 0;
+                reference.angle = 0;
                 reference.speed = DEFAULT_SPEED;
             }
             break;
@@ -83,18 +85,18 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                 // The path isn't blocked
                 if (at_stop_line(stop_distance)) {
                     cout << "Error: Still at stop line" << endl;
-                    reference.lateral_position = 0;
+                    reference.angle = 0;
                     reference.speed = 0;
                 } else {
                     // No new stop line close
                     state = control::running;
-                    reference.lateral_position = 0;
+                    reference.angle = 0;
                     reference.speed = DEFAULT_SPEED;
                 }
             } else {
                 // The path is blocked
                 state = control::stoped_at_obstacle;
-                reference.lateral_position = 0;
+                reference.angle = 0;
                 reference.speed = 0;
             }
             break;
@@ -104,11 +106,11 @@ reference_t ControlCenter::operator()(int obstacle_distance, int stop_distance) 
                 // The path is no longer blocked
                 cout << "INFO: Path no longer blocked" << endl;
                 state = control::running;
-                reference.lateral_position = 0;
+                reference.angle = 0;
                 reference.speed = DEFAULT_SPEED;
             } else {
                 // The path is still blocked
-                reference.lateral_position = 0;
+                reference.angle = 0;
                 reference.speed = 0;
             }
             break;
