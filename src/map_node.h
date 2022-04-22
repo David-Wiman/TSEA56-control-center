@@ -27,6 +27,9 @@ public:
     void set_weight(int w) {
         weight = w;
     }
+    void set_visited(bool value) {
+        visited = value;
+    }
     unsigned int get_weight() const {
         return weight;
     }
@@ -39,8 +42,12 @@ public:
     std::string get_name() const {
         return name;
     }
+    bool is_visited() const {
+        return visited;
+    }
 
 private:
+    bool visited;
     std::string name;
     Edge left;
     Edge right;

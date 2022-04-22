@@ -16,10 +16,10 @@ public:
     DijkstraSolver operator=(DijkstraSolver const&) = delete;
 
     void update_map(MapGraph map_graph);
-    std::list<MapNode*> solve(std::string start_node);
+    std::list<MapNode*> solve(std::string start_node_name);
 
 private:
-    void initiate_map_graph(std::string start_node);
+    MapNode* initiate_map_graph(std::string start_node_name);
     MapGraph map_graph;
 
 };
