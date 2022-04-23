@@ -18,7 +18,7 @@ namespace control {
 
 typedef struct DriveInstruction {
     enum control::Instruction instruction;
-    int id;
+    std::string id;
 } drive_instruction_t;
 
 typedef struct ReferenceValues {
@@ -34,23 +34,24 @@ public:
     void set_position(MapNode* mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
+    void add_drive_instruction(enum control::Instruction instruction, std::string id);
     void add_drive_instruction(drive_instruction_t drive_instruction);
 
     /* The control center is callable. It must be called every program cycle. */
     reference_t operator()(
-            int obstacle_distance, int stop_distance, int left_angle, 
+            int obstacle_distance, int stop_distance, int left_angle,
             int right_angle, int image_processing_status_code);
 
     std::string get_position();
 
     /* Return 0 if no new instruction have been finished. */
-    int get_finished_instruction_id();
+    std::string get_finished_instruction_id();
     enum control::ControlState get_state();
 
 private:
     void finish_instruction();
 
-    /* Return true if the car is at a stop line (which it have not been at 
+    /* Return true if the car is at a stop line (which it have not been at
      * before), otherwise return false. */
     bool at_stop_line(int stop_distance);
 
@@ -59,7 +60,7 @@ private:
     std::list<int> stop_distance_buffer{};
     enum control::ControlState state;
     std::list<drive_instruction_t> drive_instructions{};
-    std::list<int> finished_id_buffer{};
+    std::list<std::string> finished_id_buffer{};
     bool have_stoped{false};
 };
 

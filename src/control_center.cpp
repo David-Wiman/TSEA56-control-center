@@ -24,6 +24,11 @@ void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction)
     drive_instructions.push_back(drive_instruction);
 }
 
+void ControlCenter::add_drive_instruction(control::Instruction instruction, string id) {
+    drive_instruction_t drive_instruction{.instruction = instruction, .id=id};
+    drive_instructions.push_back(drive_instruction);
+}
+
 reference_t ControlCenter::operator()(
         int obstacle_distance, int stop_distance,
         int left_angle, int right_angle, int image_processing_status_code) {
@@ -143,7 +148,7 @@ bool ControlCenter::at_stop_line(int stop_distance) {
 
 void ControlCenter::finish_instruction() {
     cout << "Finish instruction" << endl;
-    int id = drive_instructions.front().id;
+    string id = drive_instructions.front().id;
     drive_instructions.pop_front();
     finished_id_buffer.push_back(id);
 }
@@ -152,11 +157,11 @@ std::string ControlCenter::get_position() {
     return "";
 }
 
-int ControlCenter::get_finished_instruction_id() {
+string ControlCenter::get_finished_instruction_id() {
     if (finished_id_buffer.empty()) {
-        return 0;
+        return "";
     } else {
-        int id = finished_id_buffer.front();
+        string id = finished_id_buffer.front();
         finished_id_buffer.pop_front();
         return id;
     }
