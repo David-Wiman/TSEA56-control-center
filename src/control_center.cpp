@@ -6,7 +6,9 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(): state{control::stoped_at_node} {}
+ControlCenter::ControlCenter(): state{control::stoped_at_node} {
+    cout << "INFO: Initilize ControlCenter" << endl;
+}
 
 /*void ControlCenter::set_new_map(MapGraph* map_graph) {
 
@@ -25,7 +27,9 @@ void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction)
 }
 
 void ControlCenter::add_drive_instruction(control::Instruction instruction, string id) {
-    drive_instruction_t drive_instruction{.instruction = instruction, .id=id};
+    drive_instruction_t drive_instruction{};
+    drive_instruction.instruction = instruction;
+    drive_instruction.id = id;
     drive_instructions.push_back(drive_instruction);
 }
 
@@ -35,95 +39,123 @@ reference_t ControlCenter::operator()(
     if (stop_distance == -1)
         stop_distance = 1000;
 
-    cout << "Int stop_distance: " << stop_distance << endl;
+    cout << "DEBUG: obstacle_distance: " << obstacle_distance
+         << ", stop_distance: " << stop_distance << endl;
     reference_t reference = {0, 0, 1};
+
+    update_state(obstacle_distance, stop_distance);
+
+    // Drive mode
+    if ((state == control::running_in_intersection) || image_processing_status_code != 0) {
+        reference.drive_mode = 2;
+    } else {
+        reference.drive_mode = 1;
+    }
+
+    reference.angle = calculate_angle(left_angle, right_angle);
+    reference.speed = calculate_speed();
+
+    return reference;
+}
+
+void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
     drive_instruction_t instr{};
 
     if (drive_instructions.empty()) {
         // No instruction
-        return reference;
+        state = control::stoped_at_node;
+        return;
     } else {
         instr = drive_instructions.front();
     }
+
     if (instr.instruction == control::stop) {
         state = control::stoped_at_node;
         finish_instruction();
-        reference.speed = 0;
+        return;
     }
 
     switch (state) {
         case control::running:
-            if (obstacle_distance <= STOP_DISTANCE_CLOSE) {
-                // The path is blocked
-                cout << "path blocked" << endl;
+            if (path_blocked(obstacle_distance)) {
+                cout << "INFO: path blocked" << endl;
                 state = control::stoped_at_obstacle;
-                reference.angle = 0;
-                reference.speed = 0;
             } else if (at_stop_line(stop_distance)) {
                 // At node
-                cout << "at node" << endl;
+                cout << "INFO: at node" << endl;
                 finish_instruction();
-                if (drive_instructions.empty()) {
-                    // Stop
-                    state = control::stoped_at_node;
-                    reference.angle = 0;
-                    reference.speed = 0;
-                } else {
-                    // More instructions, continue driving
-                    reference.angle = 0;
-                    reference.speed = DEFAULT_SPEED;
-                }
+                state = get_new_state();
             } else {
                 // Clear path
-                cout << "clear path" << endl;
-                reference.angle = 0;
-                reference.speed = DEFAULT_SPEED;
+                cout << "DEBUG: clear path" << endl;
             }
             break;
 
         case control::running_in_intersection:
-            // TODO
+            if (path_blocked(obstacle_distance)) {
+                cout << "INFO: path blocked" << endl;
+                state = control::stoped_at_obstacle;
+            } else if (at_stop_line(stop_distance)) {
+                // At node
+                cout << "INFO: at node" << endl;
+                finish_instruction();
+                state = get_new_state();
+            } else {
+                // Clear path
+                cout << "DEBUG: clear path" << endl;
+            }
             break;
 
         case control::stoped_at_node:
-            if (obstacle_distance > STOP_DISTANCE_CLOSE) {
+            if (!path_blocked(obstacle_distance)) {
                 // The path isn't blocked
                 if (at_stop_line(stop_distance)) {
                     cout << "Error: Still at stop line" << endl;
-                    reference.angle = 0;
-                    reference.speed = 0;
                 } else {
                     // No new stop line close
+                    cout << "INFO: Begining next drive mission" << endl;
                     state = control::running;
-                    reference.angle = 0;
-                    reference.speed = DEFAULT_SPEED;
                 }
             } else {
                 // The path is blocked
+                cout << "INFO: path blocked" << endl;
                 state = control::stoped_at_obstacle;
-                reference.angle = 0;
-                reference.speed = 0;
             }
             break;
 
         case control::stoped_at_obstacle:
-            if (obstacle_distance > STOP_DISTANCE_CLOSE) {
+            if (!path_blocked(obstacle_distance)) {
                 // The path is no longer blocked
                 cout << "INFO: Path no longer blocked" << endl;
                 state = control::running;
-                reference.angle = 0;
-                reference.speed = DEFAULT_SPEED;
-            } else {
-                // The path is still blocked
-                reference.angle = 0;
-                reference.speed = 0;
             }
             break;
 
         default:
             cout << "Error: control center in unknown state" << endl;
     }
-    return reference;
+}
+
+enum control::ControlState ControlCenter::get_new_state() {
+    enum control::Instruction instr{};
+    if (drive_instructions.empty()) {
+        // No instruction
+        return control::stoped_at_node;
+    } else {
+        instr = drive_instructions.front().instruction;
+    }
+    switch (instr) {
+        case control::forward:
+            return control::running;
+        case control::left:
+        case control::right:
+            return control::running_in_intersection;
+        case control::stop:
+            return control::stoped_at_node;
+        default:
+            cout << "Error: Unknown state" << endl;
+            return control::stoped_at_node;
+    }
 }
 
 bool ControlCenter::at_stop_line(int stop_distance) {
@@ -155,6 +187,37 @@ void ControlCenter::finish_instruction() {
 
 std::string ControlCenter::get_position() {
     return "";
+}
+
+int ControlCenter::calculate_speed() {
+    switch (state) {
+        case control::running:
+        case control::running_in_intersection:
+            return DEFAULT_SPEED;
+
+        case control::stoped_at_node:
+        case control::stoped_at_obstacle:
+            return 0;
+
+        default:
+            cout << "Error: Unknown state in set_speed" << endl;
+            return 0;
+    }
+}
+
+int ControlCenter::calculate_angle(int left_angle, int right_angle) {
+    control::Instruction instr{drive_instructions.front().instruction};
+    switch (instr) {
+        case control::forward:
+            return (left_angle + right_angle) / 2;
+        case control::left:
+            return left_angle;
+        case control::right:
+            return right_angle;
+        default:
+            cout << "Error: Unexpected instruction when calculating angle" << endl;
+            return 0;
+    }
 }
 
 string ControlCenter::get_finished_instruction_id() {

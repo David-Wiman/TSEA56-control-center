@@ -71,7 +71,7 @@ TEST_CASE("Control Center") {
     SECTION("Stop-line detection") {
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
-        control_center.add_drive_instruction(control::left, "1");
+        control_center.add_drive_instruction(control::forward, "1");
         control_center(STOP_DISTANCE_CLOSE-10, 200, 0, 0, 0);
         CHECK(control_center.get_state() == control::stoped_at_obstacle);
         control_center(STOP_DISTANCE_CLOSE+10, 200, 0, 0, 0);
@@ -86,7 +86,7 @@ TEST_CASE("Control Center") {
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(control_center.get_state() == control::running);
 
-        distance = 30;
+        distance = STOP_DISTANCE_CLOSE;
         ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
@@ -124,17 +124,17 @@ TEST_CASE("Control Center") {
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "1");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == control::running);
+        CHECK(control_center.get_state() == control::running_in_intersection);
 
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 20, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == control::running);
+        CHECK(control_center.get_state() == control::running_in_intersection);
 
         ref = control_center(1000, STOP_DISTANCE_FAR + 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == control::running);
+        CHECK(control_center.get_state() == control::running_in_intersection);
 
         // At line, stop
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
@@ -166,5 +166,33 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_finished_instruction_id() == "3");
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == control::stoped_at_node);
+    }
+    SECTION("Intersections") {
+        ControlCenter control_center{};
+        reference_t ref{};
+        int left_angle{};
+        int right_angle{};
+
+        control_center.add_drive_instruction(control::forward, "1");
+        control_center.add_drive_instruction(control::left, "2");
+
+        // Straight road
+        left_angle = -1;
+        right_angle = 1;
+        ref = control_center(200, 200, left_angle, right_angle, 0);
+        CHECK(ref.angle == (left_angle+right_angle)/2);
+        CHECK(ref.drive_mode == 1);
+
+
+        // Finish straight part, enter intersection
+        control_center(200, STOP_DISTANCE_CLOSE, 0, 0, 0);
+        CHECK(control_center.get_state() == control::running_in_intersection);
+
+        // Left turn
+        left_angle = 20;
+        right_angle = -300;
+        ref = control_center(200, 200, left_angle, right_angle, 0);
+        CHECK(ref.angle == left_angle);
+        CHECK(ref.drive_mode == 2);
     }
 }

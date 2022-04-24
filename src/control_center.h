@@ -49,11 +49,30 @@ public:
     enum control::ControlState get_state();
 
 private:
+    void update_state(int obstacle_distance, int stop_distence);
+
+    /* Helpter to calculate new state based on the next instruction. */
+    enum control::ControlState get_new_state();
+
+    /* Remove the current instruction from the buffer, and add it's id to the
+     * finished instructin id buffer. */
     void finish_instruction();
 
+    inline bool path_blocked(int obstacle_distance) {
+        return obstacle_distance <= STOP_DISTANCE_CLOSE;
+    }
+
     /* Return true if the car is at a stop line (which it have not been at
-     * before), otherwise return false. */
+     * before), otherwise return false. 
+     *
+     * Note, this method must be called exactly once per program cycle. */
     bool at_stop_line(int stop_distance);
+
+    /* Call after update_state(). */
+    int calculate_speed();
+
+    /* Call after update_state(). */
+    int calculate_angle(int left_angle, int right_angle);
 
     //MapGraph map;
     std::list<int> obstacle_distance_buffer{};
