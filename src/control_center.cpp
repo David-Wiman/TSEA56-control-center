@@ -77,20 +77,6 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
 
     switch (state) {
         case control::running:
-            if (path_blocked(obstacle_distance)) {
-                cout << "INFO: path blocked" << endl;
-                state = control::stoped_at_obstacle;
-            } else if (at_stop_line(stop_distance)) {
-                // At node
-                cout << "INFO: at node" << endl;
-                finish_instruction();
-                state = get_new_state();
-            } else {
-                // Clear path
-                cout << "DEBUG: clear path" << endl;
-            }
-            break;
-
         case control::running_in_intersection:
             if (path_blocked(obstacle_distance)) {
                 cout << "INFO: path blocked" << endl;
@@ -101,7 +87,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
                 finish_instruction();
                 state = get_new_state();
             } else {
-                // Clear path
+                // Clear path, don't change state
                 cout << "DEBUG: clear path" << endl;
             }
             break;
