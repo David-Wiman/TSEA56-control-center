@@ -7,8 +7,10 @@ OBJ_DIR := build
 CCC = g++
 
 # Compiling flags
-CCFLAGS += -Wno-deprecated-declarations -Wall -Wextra -pedantic -Weffc++ -Wold-style-cast -Woverloaded-virtual -fmax-errors=3 -g
-CCFLAGS += -std=c++17 -MMD
+DEBUG_FLAGS := -Og
+OPTIM_FLAGS := -O3
+CCFLAGS += -Wno-deprecated-declarations -Wall -Wextra -pedantic -Weffc++ -Wold-style-cast -Woverloaded-virtual -fmax-errors=3
+CCFLAGS += -std=c++17 -MMD $(OPTIM_FLAGS)
 
 # Linking flags
 #LDFLAGS += -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
