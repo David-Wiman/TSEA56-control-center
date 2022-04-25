@@ -1,10 +1,16 @@
 #include "catch.hpp"
+#include "dijkstra_solver.h"
+#include "map_graph.h"
 #include "map_node.h"
 #include "control_center.h"
 
+#include <string>
 #include <iostream>
+#include <nlohmann/json.hpp>
+
 
 using namespace std;
+using json = nlohmann::json;
 
 TEST_CASE("Map Node") {
     SECTION("Constructors") {
@@ -48,6 +54,31 @@ TEST_CASE("Map Node") {
 
         CHECK(*node2.get_left().node == node1);
         //CHECK(node2.get_next_right() != node1);
+    }
+}
+
+TEST_CASE("Dijkstra") {
+    SECTION("Basic solve") {
+        cout << "\nStart of Dijkstra\n" << endl;
+        DijkstraSolver solver{};
+        /*string map_string = "{\"Map\": {\"B\": 3, \"C\": 1}, {\"D\": 2}, {\"B\": 1, \"D\": 5}, {\"D\": 0}}";
+
+        json json_map{};
+        try {
+            json_map = json::parse(map_string);
+        } catch (std::invalid_argument&) {
+            cout << "Error in JSON parsing" << endl;
+        }*/
+
+        MapGraph map_graph{};
+
+        solver.update_map(map_graph);
+
+        list<MapNode*> optimal_route = solver.solve("A");
+
+        for (MapNode* node : optimal_route) {
+            cout << node->get_name() << ", " << node->get_weight() << endl;
+        }
     }
 }
 
