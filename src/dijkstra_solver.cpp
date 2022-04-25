@@ -8,6 +8,8 @@ using namespace std;
 
 DijkstraSolver::DijkstraSolver(): map_graph{} {}
 
+DijkstraSolver::~DijkstraSolver() {}
+
 /* Sets a new map */
 void DijkstraSolver::update_map(MapGraph m) {
     map_graph = m;
@@ -21,39 +23,44 @@ std::list<MapNode*> DijkstraSolver::solve(string start_node_name) {
 
     // Set new starting-node and remove from list
     while (!(nodes_to_visit.empty())) {
+        // Make sure the node with the lowest weight is searched first
+        nodes_to_visit.sort(Comparator());
         active_node = nodes_to_visit.front();
         nodes_to_visit.pop_front();
         active_node->set_visited(true);
 
         // Update left neighbour's weight if bigger than active nodes weight + edge weight
-        MapNode* left_neighbour = active_node->get_left().node;
-        if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
-            left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
+        MapNode *left_neighbour = active_node->get_left().node;
+        if (!(left_neighbour == nullptr)) {
+            if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
+                left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
+            }
         }
         
         // Update right neighbour's weight if bigger than active nodes weight + edge weight
-        MapNode* right_neighbour = active_node->get_right().node;
-        if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
-            right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
+        MapNode *right_neighbour = active_node->get_right().node;
+        if (!(right_neighbour == nullptr)) {
+            if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
+                right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
+            }
         }
 
         // Add nodes to nodes_to_visit list if they are not already visited
-        if (!(left_neighbour->is_visited())) {
-            nodes_to_visit.push_back(left_neighbour);
-        }
+        if (!(left_neighbour == nullptr)) {
+            if (!(left_neighbour->is_visited())) {
+                nodes_to_visit.push_back(left_neighbour);
+            }
+        } 
 
-        if (!(right_neighbour->is_visited())) {
-            nodes_to_visit.push_back(right_neighbour);
+        if (!(right_neighbour == nullptr)) {
+            if (!(right_neighbour->is_visited())) {
+                nodes_to_visit.push_back(right_neighbour);
+            }
         }
     }
 
     /* Sort nodes by increasing node-weight */
-    struct {
-        bool operator()(MapNode* a, MapNode* b) const {
-            return ((a->get_weight()) < (b->get_weight()));
-        }
-    } compare_node_weights;
-    sort(map_graph.nodes.begin(), map_graph.nodes.end(), compare_node_weights);
+    map_graph.nodes.sort(Comparator());
 
     return map_graph.nodes;
 }

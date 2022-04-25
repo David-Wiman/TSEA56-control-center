@@ -7,6 +7,12 @@
 #include <list>
 #include <string>
 
+struct Comparator {
+    bool operator()(const MapNode *a, const MapNode *b) const {
+        return a->get_weight() < b->get_weight();
+    }
+};
+
 class DijkstraSolver {
 public:
     DijkstraSolver();
