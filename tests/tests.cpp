@@ -181,8 +181,6 @@ TEST_CASE("Control Center") {
         right_angle = 1;
         ref = control_center(200, 200, left_angle, right_angle, 0);
         CHECK(ref.angle == (left_angle+right_angle)/2);
-        CHECK(ref.drive_mode == 1);
-
 
         // Finish straight part, enter intersection
         control_center(200, STOP_DISTANCE_CLOSE, 0, 0, 0);
@@ -193,6 +191,33 @@ TEST_CASE("Control Center") {
         right_angle = -300;
         ref = control_center(200, 200, left_angle, right_angle, 0);
         CHECK(ref.angle == left_angle);
+    }
+    SECTION("Drive mode") {
+        ControlCenter control_center{};
+        reference_t ref{};
+        int image_processing_status_code{0};
+
+        control_center.add_drive_instruction(control::forward, "1");
+        control_center.add_drive_instruction(control::left, "2");
+
+        // Straight road
+        ref = control_center(200, 200, 0, 0, image_processing_status_code);
+        CHECK(ref.drive_mode == 1);
+
+        // Bad lateral data from image processing module
+        image_processing_status_code = 1;
+        ref = control_center(200, 200, 0, 0, image_processing_status_code);
+        CHECK(ref.drive_mode == 2);
+
+
+        // Finish straight part, enter intersection
+        image_processing_status_code = 0;
+        ref = control_center(200, 200, 0, 0, image_processing_status_code);
+        control_center(200, STOP_DISTANCE_CLOSE, 0, 0, image_processing_status_code);
+        CHECK(control_center.get_state() == control::running_in_intersection);
+
+        // Intersection
+        ref = control_center(200, 200, 0, 0, image_processing_status_code);
         CHECK(ref.drive_mode == 2);
     }
 }
