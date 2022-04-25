@@ -10,7 +10,6 @@ using namespace std;
 TEST_CASE("Map Node") {
     SECTION("Constructors") {
         Logger::init();
-        cout << "INit log" << endl;
         MapNode node1{"1", nullptr, nullptr};
         MapNode node2{"2", &node1, nullptr, 34};
         MapNode node3{"3", &node1, &node2};

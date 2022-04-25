@@ -83,16 +83,16 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
         case control::running:
         case control::running_in_intersection:
             if (path_blocked(obstacle_distance)) {
-                cout << "INFO: path blocked" << endl;
+                Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
                 state = control::stoped_at_obstacle;
             } else if (at_stop_line(stop_distance)) {
                 // At node
-                cout << "INFO: at node" << endl;
+                Logger::log(INFO, __FILE__, "ControlCenter", "At stop line");
                 finish_instruction();
                 state = get_new_state();
             } else {
                 // Clear path, don't change state
-                cout << "DEBUG: clear path" << endl;
+                Logger::log(DEBUG, __FILE__, "ControlCenter", "Running");
             }
             break;
 
@@ -100,15 +100,15 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
             if (!path_blocked(obstacle_distance)) {
                 // The path isn't blocked
                 if (at_stop_line(stop_distance)) {
-                    cout << "Error: Still at stop line" << endl;
+                    Logger::log(ERROR, __FILE__, "ControlCenter", "Still at stop line");
                 } else {
                     // No new stop line close
-                    cout << "INFO: Begining next drive mission" << endl;
+                    Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive mission");
                     state = control::running;
                 }
             } else {
                 // The path is blocked
-                cout << "INFO: path blocked" << endl;
+                Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
                 state = control::stoped_at_obstacle;
             }
             break;
@@ -116,13 +116,13 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
         case control::stoped_at_obstacle:
             if (!path_blocked(obstacle_distance)) {
                 // The path is no longer blocked
-                cout << "INFO: Path no longer blocked" << endl;
+                Logger::log(INFO, __FILE__, "ControlCenter", "Path no longer blocked");
                 state = control::running;
             }
             break;
 
         default:
-            cout << "Error: control center in unknown state" << endl;
+            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
     }
 }
 
@@ -143,7 +143,7 @@ enum control::ControlState ControlCenter::get_new_state() {
         case control::stop:
             return control::stoped_at_node;
         default:
-            cout << "Error: Unknown state" << endl;
+            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
             return control::stoped_at_node;
     }
 }
@@ -169,7 +169,7 @@ bool ControlCenter::at_stop_line(int stop_distance) {
 }
 
 void ControlCenter::finish_instruction() {
-    cout << "Finish instruction" << endl;
+    Logger::log(INFO, __FILE__, "ControlCenter", "Finishing instruction");
     string id = drive_instructions.front().id;
     drive_instructions.pop_front();
     finished_id_buffer.push_back(id);
@@ -190,7 +190,7 @@ int ControlCenter::calculate_speed() {
             return 0;
 
         default:
-            cout << "Error: Unknown state in set_speed" << endl;
+            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state while calculating speed");
             return 0;
     }
 }
@@ -205,7 +205,7 @@ int ControlCenter::calculate_angle(int left_angle, int right_angle) {
         case control::right:
             return right_angle;
         default:
-            cout << "Error: Unexpected instruction when calculating angle" << endl;
+            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state while calculating angle");
             return 0;
     }
 }
