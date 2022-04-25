@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "map_node.h"
 #include "control_center.h"
+#include "log.h"
 
 #include <iostream>
 
@@ -8,9 +9,12 @@ using namespace std;
 
 TEST_CASE("Map Node") {
     SECTION("Constructors") {
+        Logger::init();
+        cout << "INit log" << endl;
         MapNode node1{"1", nullptr, nullptr};
         MapNode node2{"2", &node1, nullptr, 34};
         MapNode node3{"3", &node1, &node2};
+        Logger::close();
     }
     SECTION("Constructors (pointers)") {
         MapNode *node1 = new MapNode{"1", nullptr, nullptr};
@@ -41,6 +45,7 @@ TEST_CASE("Map Node") {
 
 TEST_CASE("Control Center") {
     SECTION("Basics") {
+        Logger::init();
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
         control_center.add_drive_instruction(control::left, "1");
@@ -48,6 +53,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::running);
     }
     SECTION("Obstacle detection") {
+        Logger::init();
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
         control_center.add_drive_instruction(control::left, "1");
@@ -67,8 +73,10 @@ TEST_CASE("Control Center") {
                 CHECK(control_center.get_state() == control::stoped_at_obstacle);
             }
         }
+    Logger::close();
     }
     SECTION("Stop-line detection") {
+        Logger::init();
         ControlCenter control_center{};
         CHECK(control_center.get_state() == control::stoped_at_node);
         control_center.add_drive_instruction(control::forward, "1");
@@ -92,6 +100,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
     }
     SECTION("Drive Instructions") {
+        Logger::init();
         ControlCenter control_center{};
         reference_t ref{};
         control_center.add_drive_instruction(control::forward, "1");
@@ -109,6 +118,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_finished_instruction_id() == "");
     }
     SECTION("Multiple instructions") {
+        Logger::init();
         ControlCenter control_center{};
         reference_t ref{};
         control_center.add_drive_instruction(control::forward, "1");
@@ -168,6 +178,7 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == control::stoped_at_node);
     }
     SECTION("Intersections") {
+        Logger::init();
         ControlCenter control_center{};
         reference_t ref{};
         int left_angle{};
@@ -193,6 +204,7 @@ TEST_CASE("Control Center") {
         CHECK(ref.angle == left_angle);
     }
     SECTION("Drive mode") {
+        Logger::init();
         ControlCenter control_center{};
         reference_t ref{};
         int image_processing_status_code{0};

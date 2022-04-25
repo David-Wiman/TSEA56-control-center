@@ -1,3 +1,9 @@
+# Makefile with support for recursive subdirectories
+#
+# Note that this files makes a some  assumtions about the recursive makefiles:
+# they must have a "base" target which does not make the main() function, they
+# must have the same definition of SRC_DIR and OBJ_DIR.
+
 # Folders
 SRC_DIR = src
 TEST_DIR := tests
@@ -20,7 +26,7 @@ MAINFILE := main.cpp
 
 # Name of output
 OUTNAME := main.out
-TESTOUTNAME := check.out
+TEST_OUTNAME := test.out
 
 MAINOBJ := main.o
 SOURCE := $(shell find $(SRC_DIR) -name '*.cpp' ! -name $(MAINFILE))
@@ -30,17 +36,34 @@ TEST_OBJS := $(patsubst $(TEST_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(TEST_SOURCE))
 ALL_OBJS := $(OBJS) $(TEST_OBJS) $(OBJ_DIR)/$(MAINOBJ)
 DEPS := $(patsubst %.o, %.d, $(ALL_OBJS))
 
+# For handling recursive directories
+SUBDIRS := logger
+CCFLAGS += $(foreach d, $(SUBDIRS), -I$(d)/src)
+SUBDIR_OBJS = $(wildcard $(foreach d, $(SUBDIRS), $(d)/$(OBJ_DIR)/*.o))
+
 # Main objetice - created with 'make' or 'make main'.
-main: base $(OBJ_DIR)/$(MAINOBJ)
+main: subdirs base $(OBJ_DIR)/$(MAINOBJ)
 	@ echo Linking main file
-	@ $(CCC) $(CCFLAGS) -o $(OUTNAME) $(OBJS) $(OBJ_DIR)/$(MAINOBJ) $(LDFLAGS)
+	@ $(CCC) $(CCFLAGS) -o $(OUTNAME) \
+		$(OBJS) $(OBJ_DIR)/$(MAINOBJ) $(SUBDIR_OBJS) $(LDFLAGS)
 	@ echo ""
 
 # Test objetice
-tests: base $(TEST_OBJS)
+tests: subdirs base $(TEST_OBJS)
 	@ echo Linking test file
-	@ $(CCC) $(CCFLAGS) -o $(TESTOUTNAME) $(OBJS) $(TEST_OBJS) $(LDFLAGS)
+	@ $(CCC) $(CCFLAGS) -I$(SRC_DIR) -o $(TEST_OUTNAME) \
+		$(OBJS) $(TEST_OBJS) $(SUBDIR_OBJS) $(LDFLAGS)
 	@ echo ""
+
+# Recursive make of subdirectories
+
+.PHONY: subdirs $(SUBDIRS)
+
+subdirs: $(SUBDIRS)
+
+$(SUBDIRS):
+	@ rm -f $@/$(OBJ_DIR)/$(MAINOBJ)
+	$(MAKE) base -C $@
 
 # Compile everything except mainfile
 base: $(OBJ_DIR) $(OBJS) Makefile
@@ -63,20 +86,21 @@ run: main
 	@ ./$(OUTNAME)
 
 check: tests
-	@ ./$(TESTOUTNAME)
+	@ ./$(TEST_OUTNAME)
 
 check-leaktest: tests
-	@ valgrind --leak-check=full ./$(TESTOUTNAME)
+	@ valgrind --leak-check=full --suppressions=./suppressions.txt ./test
 
 run-leaktest: main
 	@ valgrind --leak-check=full ./$(OUTNAME)
 
 # 'make clean' removes object files and memory dumps.
+.PHONY: clean
 clean:
-	@ \rm -rf $(OBJ_DIR) *.gch core
+	@ \rm -rf $(foreach d, $(SUBDIRS) ., $(d)/$(OBJ_DIR)) *.gch core
 
 # 'make zap' also removes the executable and backup files.
 zap: clean
-	@ \rm -rf $(OUTNAME) test *~
+	@ \rm -rf $(OUTNAME) $(OUTNAME) *~
 
 -include $(DEPS)

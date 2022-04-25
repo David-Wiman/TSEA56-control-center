@@ -1,13 +1,15 @@
 #include "control_center.h"
 #include "map_node.h"
+#include "log.h"
 
 #include <list>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
 ControlCenter::ControlCenter(): state{control::stoped_at_node} {
-    cout << "INFO: Initilize ControlCenter" << endl;
+    Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
 /*void ControlCenter::set_new_map(MapGraph* map_graph) {
@@ -39,8 +41,10 @@ reference_t ControlCenter::operator()(
     if (stop_distance == -1)
         stop_distance = 1000;
 
-    cout << "DEBUG: obstacle_distance: " << obstacle_distance
-         << ", stop_distance: " << stop_distance << endl;
+    stringstream ss;
+    ss << "obstacle_distance: " << obstacle_distance
+       << ", stop_distance: " << stop_distance;
+    Logger::log(DEBUG, __FILE__, "ControlCenter()", ss.str());
     reference_t reference = {0, 0, 1};
 
     update_state(obstacle_distance, stop_distance);
