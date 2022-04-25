@@ -11,7 +11,7 @@ using json = nlohmann::json;
 class MapGraph {
 public:
     MapGraph();
-    MapGraph(json map_graph);
+    //MapGraph(json map_graph);
 
 private:
     std::list<MapNode*> nodes;
