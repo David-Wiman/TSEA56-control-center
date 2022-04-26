@@ -45,15 +45,15 @@ reference_t ControlCenter::operator()(
     ss << "obstacle_distance: " << obstacle_distance
        << ", stop_distance: " << stop_distance;
     Logger::log(DEBUG, __FILE__, "ControlCenter()", ss.str());
-    reference_t reference = {0, 0, 1};
+    reference_t reference = {0, 0, drive_mode::auto_nominal};
 
     update_state(obstacle_distance, stop_distance);
 
     // Drive mode
     if ((state == control::running_in_intersection) || image_processing_status_code != 0) {
-        reference.drive_mode = 2;
+        reference.drive_mode = drive_mode::auto_critical;
     } else {
-        reference.drive_mode = 1;
+        reference.drive_mode = drive_mode::auto_nominal;
     }
 
     reference.angle = calculate_angle(left_angle, right_angle);

@@ -2,6 +2,7 @@
 #define CONTROLCENTER_H
 
 #include "map_node.h"
+#include "raspi_common.h"
 
 #include <string>
 #include <list>
@@ -20,12 +21,6 @@ typedef struct DriveInstruction {
     enum control::Instruction instruction;
     std::string id;
 } drive_instruction_t;
-
-typedef struct ReferenceValues {
-    int speed;
-    int angle;
-    int drive_mode;
-} reference_t;
 
 class ControlCenter {
 public:

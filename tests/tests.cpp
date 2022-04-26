@@ -2,6 +2,7 @@
 #include "map_node.h"
 #include "control_center.h"
 #include "log.h"
+#include "raspi_common.h"
 
 #include <iostream>
 
@@ -213,12 +214,12 @@ TEST_CASE("Control Center") {
 
         // Straight road
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == 1);
+        CHECK(ref.drive_mode == drive_mode::auto_nominal);
 
         // Bad lateral data from image processing module
         image_processing_status_code = 1;
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == 2);
+        CHECK(ref.drive_mode == drive_mode::auto_critical);
 
 
         // Finish straight part, enter intersection
@@ -229,6 +230,6 @@ TEST_CASE("Control Center") {
 
         // Intersection
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == 2);
+        CHECK(ref.drive_mode == drive_mode::auto_critical);
     }
 }

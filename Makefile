@@ -12,11 +12,14 @@ OBJ_DIR := build
 # Compiler
 CCC = g++
 
+# Other include directories with headers
+INC := -Icommon
+
 # Compiling flags
 DEBUG_FLAGS := -Og
 OPTIM_FLAGS := -O3
 CCFLAGS += -Wno-deprecated-declarations -Wall -Wextra -pedantic -Weffc++ -Wold-style-cast -Woverloaded-virtual -fmax-errors=3
-CCFLAGS += -std=c++17 -MMD $(OPTIM_FLAGS)
+CCFLAGS += -std=c++17 -MMD $(INC) $(OPTIM_FLAGS)
 
 # Linking flags
 #LDFLAGS += -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
@@ -38,7 +41,7 @@ DEPS := $(patsubst %.o, %.d, $(ALL_OBJS))
 
 # For handling recursive directories
 SUBDIRS := logger
-CCFLAGS += $(foreach d, $(SUBDIRS), -I$(d)/src)
+CCFLAGS += $(foreach d, $(SUBDIRS), -isystem$(d)/src)
 SUBDIR_OBJS = $(wildcard $(foreach d, $(SUBDIRS), $(d)/$(OBJ_DIR)/*.o))
 
 # Main objetice - created with 'make' or 'make main'.
