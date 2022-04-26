@@ -17,6 +17,16 @@ void MapNode::set_right(int edge_weight, MapNode* node) {
     right.node = node;
 }
 
+void MapNode::add_edge(int edge_weight, MapNode* node) {
+    if (left.node == nullptr) {
+        set_left(edge_weight, node);
+    } else if (right.node == nullptr) {
+        set_right(edge_weight, node);
+    } else {
+        cout << name << " can't add another neighbour " << node->get_name() << endl;
+    }
+}
+
 MapNode::~MapNode() {
     cout << "destroying " << name << endl;
 }

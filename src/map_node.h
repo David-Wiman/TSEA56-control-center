@@ -17,6 +17,7 @@ public:
     MapNode(std::string name, unsigned int weight = __INT_MAX__);
     void set_left(int edge_weight, MapNode* node);
     void set_right(int edge_weight, MapNode* node);
+    void add_edge(int edge_weight, MapNode* node);
     ~MapNode();
 
     MapNode(MapNode const&) = delete;
