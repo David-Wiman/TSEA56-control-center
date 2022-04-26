@@ -5,6 +5,7 @@
 #include "control_center.h"
 
 #include <string>
+#include <list>
 #include <iostream>
 #include <nlohmann/json.hpp>
 
@@ -61,16 +62,16 @@ TEST_CASE("Dijkstra") {
     SECTION("Basic solve") {
         cout << "\nStart of Dijkstra\n" << endl;
         DijkstraSolver solver{};
-        /*string map_string = "{\"Map\": {\"B\": 3, \"C\": 1}, {\"D\": 2}, {\"B\": 1, \"D\": 5}, {\"D\": 0}}";
-
+        string map_string = "{\"Map\": {\"A\": [{\"B\": 2}, {\"C\": 7}], \"B\": [{\"D\": 5}], \"C\": [{\"B\": 1}, {\"D\": 11}], \"D\": [] }}";
+        
         json json_map{};
         try {
             json_map = json::parse(map_string);
         } catch (std::invalid_argument&) {
             cout << "Error in JSON parsing" << endl;
-        }*/
+        }
 
-        MapGraph map_graph{};
+        MapGraph map_graph{json_map};
 
         solver.update_map(map_graph);
 
