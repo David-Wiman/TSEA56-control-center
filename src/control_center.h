@@ -11,16 +11,9 @@
 #define STOP_DISTANCE_CLOSE 30
 #define STOP_DISTANCE_FAR 100
 
-namespace control {
-
+namespace state {
     enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
-    enum Instruction {left, forward, right, stop};
 }
-
-typedef struct DriveInstruction {
-    enum control::Instruction instruction;
-    std::string id;
-} drive_instruction_t;
 
 class ControlCenter {
 public:
@@ -29,8 +22,8 @@ public:
     void set_position(MapNode* mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
-    void add_drive_instruction(enum control::Instruction instruction, std::string id);
-    void add_drive_instruction(drive_instruction_t drive_instruction);
+    void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
+    inline void add_drive_instruction(drive_instruction_t drive_instruction);
 
     /* The control center is callable. It must be called every program cycle. */
     reference_t operator()(
@@ -49,13 +42,13 @@ public:
 
     /* Return 0 if no new instruction have been finished. */
     std::string get_finished_instruction_id();
-    enum control::ControlState get_state();
+    enum state::ControlState get_state();
 
 private:
     void update_state(int obstacle_distance, int stop_distence);
 
     /* Helpter to calculate new state based on the next instruction. */
-    enum control::ControlState get_new_state();
+    enum state::ControlState get_new_state();
 
     /* Remove the current instruction from the buffer, and add it's id to the
      * finished instructin id buffer. */
@@ -80,7 +73,7 @@ private:
     //MapGraph map;
     std::list<int> obstacle_distance_buffer{};
     std::list<int> stop_distance_buffer{};
-    enum control::ControlState state;
+    enum state::ControlState state;
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
     bool have_stoped{false};

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(): state{control::stoped_at_node} {
+ControlCenter::ControlCenter(): state{state::stoped_at_node} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -28,9 +28,9 @@ void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction)
     drive_instructions.push_back(drive_instruction);
 }
 
-void ControlCenter::add_drive_instruction(control::Instruction instruction, string id) {
+void ControlCenter::add_drive_instruction(instruction::InstructionNumber instruction, string id) {
     drive_instruction_t drive_instruction{};
-    drive_instruction.instruction = instruction;
+    drive_instruction.number = instruction;
     drive_instruction.id = id;
     drive_instructions.push_back(drive_instruction);
 }
@@ -50,7 +50,7 @@ reference_t ControlCenter::operator()(
     update_state(obstacle_distance, stop_distance);
 
     // Drive mode
-    if ((state == control::running_in_intersection) || image_processing_status_code != 0) {
+    if ((state == state::running_in_intersection) || image_processing_status_code != 0) {
         reference.drive_mode = drive_mode::auto_critical;
     } else {
         reference.drive_mode = drive_mode::auto_nominal;
@@ -63,28 +63,28 @@ reference_t ControlCenter::operator()(
 }
 
 void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
-    drive_instruction_t instr{};
+    drive_instruction_t instruction{};
 
     if (drive_instructions.empty()) {
         // No instruction
-        state = control::stoped_at_node;
+        state = state::stoped_at_node;
         return;
     } else {
-        instr = drive_instructions.front();
+        instruction = drive_instructions.front();
     }
 
-    if (instr.instruction == control::stop) {
-        state = control::stoped_at_node;
+    if (instruction.number == instruction::stop) {
+        state = state::stoped_at_node;
         finish_instruction();
         return;
     }
 
     switch (state) {
-        case control::running:
-        case control::running_in_intersection:
+        case state::running:
+        case state::running_in_intersection:
             if (path_blocked(obstacle_distance)) {
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
-                state = control::stoped_at_obstacle;
+                state = state::stoped_at_obstacle;
             } else if (at_stop_line(stop_distance)) {
                 // At node
                 Logger::log(INFO, __FILE__, "ControlCenter", "At stop line");
@@ -96,7 +96,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
             }
             break;
 
-        case control::stoped_at_node:
+        case state::stoped_at_node:
             if (!path_blocked(obstacle_distance)) {
                 // The path isn't blocked
                 if (at_stop_line(stop_distance)) {
@@ -104,20 +104,20 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
                 } else {
                     // No new stop line close
                     Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive mission");
-                    state = control::running;
+                    state = state::running;
                 }
             } else {
                 // The path is blocked
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
-                state = control::stoped_at_obstacle;
+                state = state::stoped_at_obstacle;
             }
             break;
 
-        case control::stoped_at_obstacle:
+        case state::stoped_at_obstacle:
             if (!path_blocked(obstacle_distance)) {
                 // The path is no longer blocked
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path no longer blocked");
-                state = control::running;
+                state = state::running;
             }
             break;
 
@@ -126,25 +126,25 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
     }
 }
 
-enum control::ControlState ControlCenter::get_new_state() {
-    enum control::Instruction instr{};
+enum state::ControlState ControlCenter::get_new_state() {
+    enum instruction::InstructionNumber instr{};
     if (drive_instructions.empty()) {
         // No instruction
-        return control::stoped_at_node;
+        return state::stoped_at_node;
     } else {
-        instr = drive_instructions.front().instruction;
+        instr = drive_instructions.front().number;
     }
     switch (instr) {
-        case control::forward:
-            return control::running;
-        case control::left:
-        case control::right:
-            return control::running_in_intersection;
-        case control::stop:
-            return control::stoped_at_node;
+        case instruction::forward:
+            return state::running;
+        case instruction::left:
+        case instruction::right:
+            return state::running_in_intersection;
+        case instruction::stop:
+            return state::stoped_at_node;
         default:
             Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
-            return control::stoped_at_node;
+            return state::stoped_at_node;
     }
 }
 
@@ -181,12 +181,12 @@ std::string ControlCenter::get_position() {
 
 int ControlCenter::calculate_speed() {
     switch (state) {
-        case control::running:
-        case control::running_in_intersection:
+        case state::running:
+        case state::running_in_intersection:
             return DEFAULT_SPEED;
 
-        case control::stoped_at_node:
-        case control::stoped_at_obstacle:
+        case state::stoped_at_node:
+        case state::stoped_at_obstacle:
             return 0;
 
         default:
@@ -196,13 +196,13 @@ int ControlCenter::calculate_speed() {
 }
 
 int ControlCenter::calculate_angle(int left_angle, int right_angle) {
-    control::Instruction instr{drive_instructions.front().instruction};
+    instruction::InstructionNumber instr{drive_instructions.front().number};
     switch (instr) {
-        case control::forward:
+        case instruction::forward:
             return (left_angle + right_angle) / 2;
-        case control::left:
+        case instruction::left:
             return left_angle;
-        case control::right:
+        case instruction::right:
             return right_angle;
         default:
             Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state while calculating angle");
@@ -220,6 +220,6 @@ string ControlCenter::get_finished_instruction_id() {
     }
 }
 
-enum control::ControlState ControlCenter::get_state() {
+enum state::ControlState ControlCenter::get_state() {
     return state;
 }
