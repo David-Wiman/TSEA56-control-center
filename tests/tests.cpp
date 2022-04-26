@@ -233,17 +233,19 @@ TEST_CASE("Control Center") {
         CHECK(ref.drive_mode == drive_mode::auto_critical);
     }
     SECTION("image_proc_t") {
-        image_proc_t data{};
-        reference_t ref{};
         ControlCenter control_center{};
 
-        data.stop_distance = STOP_DISTANCE_FAR + 10;
-        data.angle_left = 0;
-        data.angle_right = 0;
-        data.status_code = 0;
+        sensor_data_t sensor_data{};
+        sensor_data.obstacle_distance = STOP_DISTANCE_FAR + 10;
+
+        image_proc_t image_data{};
+        image_data.stop_distance = STOP_DISTANCE_FAR + 10;
+        image_data.angle_left = 0;
+        image_data.angle_right = 0;
+        image_data.status_code = 0;
 
         control_center.add_drive_instruction(control::forward, "1");
-        ref = control_center(STOP_DISTANCE_FAR + 10, data);
+        reference_t ref = control_center(sensor_data, image_data);
         CHECK(control_center.get_state() == control::running);
         CHECK(ref.drive_mode == drive_mode::auto_nominal);
         CHECK(ref.speed == DEFAULT_SPEED);

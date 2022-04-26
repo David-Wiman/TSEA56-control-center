@@ -37,9 +37,9 @@ public:
             int obstacle_distance, int stop_distance, int left_angle,
             int right_angle, int image_processing_status_code);
 
-    inline reference_t operator()(int obstacle_distance, image_proc_t image_proc_data) {
+    inline reference_t operator()(sensor_data_t sensor_data, image_proc_t image_proc_data) {
         return (*this)(
-                obstacle_distance, image_proc_data.stop_distance,
+                sensor_data.obstacle_distance, image_proc_data.stop_distance,
                 image_proc_data.angle_left, image_proc_data.angle_right,
                 image_proc_data.status_code
         );
@@ -66,7 +66,7 @@ private:
     }
 
     /* Return true if the car is at a stop line (which it have not been at
-     * before), otherwise return false. 
+     * before), otherwise return false.
      *
      * Note, this method must be called exactly once per program cycle. */
     bool at_stop_line(int stop_distance);
