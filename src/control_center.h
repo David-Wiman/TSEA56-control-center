@@ -37,6 +37,14 @@ public:
             int obstacle_distance, int stop_distance, int left_angle,
             int right_angle, int image_processing_status_code);
 
+    inline reference_t operator()(int obstacle_distance, image_proc_t image_proc_data) {
+        return (*this)(
+                obstacle_distance, image_proc_data.stop_distance,
+                image_proc_data.angle_left, image_proc_data.angle_right,
+                image_proc_data.status_code
+        );
+    }
+
     std::string get_position();
 
     /* Return 0 if no new instruction have been finished. */
