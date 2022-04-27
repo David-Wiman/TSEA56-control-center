@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "dijkstra_solver.h"
+#include "drive_mission_generator.h"
 #include "map_graph.h"
 #include "map_node.h"
 #include "control_center.h"
@@ -66,7 +67,7 @@ TEST_CASE("Dijkstra") {
     SECTION("Basic solve") {
         cout << "\nStart of Dijkstra\n" << endl;
         DijkstraSolver solver{};
-        string map_string = "{\"Map\": {\"A\": [{\"B\": 2}, {\"C\": 7}], \"B\": [{\"D\": 5}], \"C\": [{\"B\": 1}, {\"D\": 11}], \"D\": [] }}";
+        string map_string = "{\"Map\": {\"A\": [{\"B\": 3}, {\"C\": 1}], \"B\": [{\"D\": 2}], \"C\": [{\"B\": 1}, {\"D\": 5}], \"D\": [] }}";
         
         json json_map{};
         try {
@@ -83,6 +84,13 @@ TEST_CASE("Dijkstra") {
 
         for (MapNode* node : optimal_route) {
             cout << node->get_name() << ", " << node->get_weight() << endl;
+        }
+
+        DriveMissionGenerator drive_mission_generator{optimal_route};
+        vector<int> drive_mission = drive_mission_generator.get_drive_mission();
+
+        for (int inst : drive_mission) {
+            cout << inst << endl;
         }
     }
 }
