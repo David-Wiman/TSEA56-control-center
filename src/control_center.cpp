@@ -59,6 +59,12 @@ reference_t ControlCenter::operator()(
     reference.angle = calculate_angle(left_angle, right_angle);
     reference.speed = calculate_speed();
 
+    ss.str("");
+    ss << "angle = " << reference.angle
+       << ", speed = " << reference.speed
+       << ", drive mode = " << reference.drive_mode;
+    Logger::log(DEBUG, __FILE__, "reference", ss.str());
+
     return reference;
 }
 
