@@ -23,7 +23,7 @@ public:
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
-    inline void add_drive_instruction(drive_instruction_t drive_instruction);
+    void add_drive_instruction(drive_instruction_t drive_instruction);
 
     /* The control center is callable. It must be called every program cycle. */
     reference_t operator()(
