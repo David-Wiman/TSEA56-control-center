@@ -103,7 +103,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
                     Logger::log(ERROR, __FILE__, "ControlCenter", "Still at stop line");
                 } else {
                     // No new stop line close
-                    Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive mission");
+                    Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive instruction");
                     state = state::running;
                 }
             } else {
