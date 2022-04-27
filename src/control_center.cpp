@@ -38,14 +38,14 @@ void ControlCenter::add_drive_instruction(instruction::InstructionNumber instruc
 reference_t ControlCenter::operator()(
         int obstacle_distance, int stop_distance,
         int left_angle, int right_angle, int image_processing_status_code) {
-    if (stop_distance == -1)
-        stop_distance = 1000;
-
     stringstream ss;
     ss << "obstacle_distance: " << obstacle_distance
        << ", stop_distance: " << stop_distance;
     Logger::log(DEBUG, __FILE__, "ControlCenter()", ss.str());
     reference_t reference = {0, 0, drive_mode::auto_nominal};
+
+    if (stop_distance == -1)
+        stop_distance = 1000;
 
     update_state(obstacle_distance, stop_distance);
 
