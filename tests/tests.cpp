@@ -1,7 +1,6 @@
 #include "catch.hpp"
 #include "dijkstra_solver.h"
 #include "drive_mission_generator.h"
-#include "map_graph.h"
 #include "map_node.h"
 #include "control_center.h"
 #include "log.h"
@@ -64,34 +63,27 @@ TEST_CASE("Map Node") {
 }
 
 TEST_CASE("Dijkstra") {
-    SECTION("Basic solve") {
-        cout << "\nStart of Dijkstra\n" << endl;
-        DijkstraSolver solver{};
-        string map_string = "{\"Map\": {\"A\": [{\"B\": 3}, {\"C\": 1}], \"B\": [{\"D\": 2}], \"C\": [{\"B\": 1}, {\"D\": 5}], \"D\": [] }}";
-        
-        json json_map{};
-        try {
-            json_map = json::parse(map_string);
-        } catch (std::invalid_argument&) {
-            cout << "Error in JSON parsing" << endl;
-        }
-
-        MapGraph map_graph{json_map};
-
-        solver.update_map(map_graph);
-
-        list<MapNode*> optimal_route = solver.solve("A");
-
-        for (MapNode* node : optimal_route) {
-            cout << node->get_name() << ", " << node->get_weight() << endl;
-        }
-
-        DriveMissionGenerator drive_mission_generator{optimal_route};
-        vector<int> drive_mission = drive_mission_generator.get_drive_mission();
-
-        for (int inst : drive_mission) {
-            cout << inst << endl;
-        }
+    string map_string = "{\"Map\": {\"A\": [{\"B\": 3}, {\"C\": 1}], \"B\": [{\"D\": 2}], \"C\": [{\"B\": 1}, {\"D\": 5}], \"D\": [] }}";
+    SECTION("JSON map") {
+        // Create JSON object
+        json json_map = json::parse(map_string);
+    }
+    SECTION("Solver") {
+        // Create JSON object
+        json json_map = json::parse(map_string);
+        // Create a DijkstraSolver, finds best node order, list instructions
+        DijkstraSolver solver{json_map, "A"};
+    }
+    SECTION("Drive Mission") {
+        // Create JSON object
+        json json_map = json::parse(map_string);
+        // Create a DijkstraSolver, finds best node order, vectorize instructions
+        DijkstraSolver solver{json_map, "A"};
+        vector<int> drive_mission = solver.get_drive_mission();
+        // Print for debugging
+        CHECK(drive_mission[0] == 2);
+        CHECK(drive_mission[1] == 0);
+        CHECK(drive_mission[2] == 1);
     }
 }
 
