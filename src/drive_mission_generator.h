@@ -2,7 +2,6 @@
 #define DRIVE_MISSION_GENERATOR_H
 
 #include "map_node.h"
-#include "map_graph.h"
 #include "dijkstra_solver.h"
 
 #include <list>
