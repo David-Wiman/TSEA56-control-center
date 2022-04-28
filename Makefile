@@ -92,7 +92,7 @@ check: tests
 	@ ./$(TEST_OUTNAME)
 
 check-leaktest: tests
-	@ valgrind --leak-check=full --suppressions=./suppressions.txt ./test
+	@ valgrind --leak-check=full ./$(TEST_OUTNAME)
 
 run-leaktest: main
 	@ valgrind --leak-check=full ./$(OUTNAME)
