@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "dijkstra_solver.h"
+#include "path_finder.h"
 #include "drive_mission_generator.h"
 #include "map_node.h"
 #include "control_center.h"
