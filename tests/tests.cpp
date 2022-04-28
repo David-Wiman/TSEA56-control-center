@@ -62,7 +62,7 @@ TEST_CASE("Map Node") {
     }
 }
 
-TEST_CASE("Dijkstra") {
+TEST_CASE("Path Finder") {
     string map_string = "{\"Map\": {\"A\": [{\"B\": 3}, {\"C\": 1}], \"B\": [{\"D\": 2}], \"C\": [{\"B\": 1}, {\"D\": 5}], \"D\": [] }}";
     SECTION("JSON map") {
         // Create JSON object
@@ -71,15 +71,15 @@ TEST_CASE("Dijkstra") {
     SECTION("Solver") {
         // Create JSON object
         json json_map = json::parse(map_string);
-        // Create a DijkstraSolver, finds best node order, list instructions
-        DijkstraSolver solver{json_map, "A"};
+        // Create a PathFinder, finds best node order, list instructions
+        PathFinder finder{json_map, "A"};
     }
     SECTION("Drive Mission") {
         // Create JSON object
         json json_map = json::parse(map_string);
-        // Create a DijkstraSolver, finds best node order, vectorize instructions
-        DijkstraSolver solver{json_map, "A"};
-        vector<int> drive_mission = solver.get_drive_mission();
+        // Create a PathFinder, finds best node order, vectorize instructions
+        PathFinder finder{json_map, "A"};
+        vector<int> drive_mission = finder.get_drive_mission();
         // Print for debugging
         CHECK(drive_mission[0] == 2);
         CHECK(drive_mission[1] == 0);
