@@ -1,4 +1,5 @@
 #include "map_node.h"
+#include "log.h"
 
 #include <iostream>
 
@@ -23,12 +24,18 @@ void MapNode::add_edge(int edge_weight, MapNode* node) {
     } else if (right.node == nullptr) {
         set_right(edge_weight, node);
     } else {
-        cout << name << " can't add another neighbour " << node->get_name() << endl;
+        Logger::log(WARNING, "map_node.cpp", "add_edge", "Try to add edge to non-existent node");
     }
 }
 
-MapNode::~MapNode() {
-    cout << "destroying " << name << endl;
+MapNode::~MapNode() {}
+
+MapNode::MapNode(const MapNode &rhs) {
+    visited = rhs.visited;
+    name = rhs.name;
+    left = rhs.left;
+    right = rhs.right;
+    weight = rhs.weight;
 }
 
 bool MapNode::operator==(MapNode const &rhs) const {
