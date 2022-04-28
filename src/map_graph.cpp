@@ -18,20 +18,20 @@ MapGraph::MapGraph(list<MapNode*> map_nodes): nodes{map_nodes} {}
 MapGraph::MapGraph(json json_map): nodes{} {
     // Create MapNode pointers and places in "nodes"
     // Assumes json_map preserve order when iterating
-    for (auto& node : json_map["Map"].items()) {
+    for (auto &node : json_map["Map"].items()) {
         MapNode *active_node = new MapNode{node.key()};
         nodes.push_back(active_node);
     }
 
     int node_index{};
     // For every node in json_map, e.g. A, B, C, ...
-    for (auto& node : json_map["Map"].items()) {
+    for (auto &node : json_map["Map"].items()) {
         // Get node at index node_index, sets it as active_node, increases node_index
         auto active_node = nodes.begin();
         advance(active_node, node_index++);
 
         // For all neighbouring nodes
-        for (auto& edge : node.value().items()) {
+        for (auto &edge : node.value().items()) {
             // Get neighbours name and edge-weight
             string neighbour_name = edge.value().begin().key();
             int neightbour_distance = edge.value().begin().value();
