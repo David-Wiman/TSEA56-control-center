@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    bool visited;
+    bool visited{};
     std::string name;
     Edge left;
     Edge right;
