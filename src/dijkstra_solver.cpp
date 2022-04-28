@@ -22,7 +22,6 @@ DijkstraSolver::DijkstraSolver(list<MapNode*> map_nodes, std::string start_node_
     solve(start_node_name);
 }
 
-/* Empty destructor */
 DijkstraSolver::~DijkstraSolver() {
     for (MapNode* ptr : nodes) {
         delete ptr;

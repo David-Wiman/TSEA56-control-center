@@ -30,14 +30,6 @@ void MapNode::add_edge(int edge_weight, MapNode* node) {
 
 MapNode::~MapNode() {}
 
-MapNode::MapNode(const MapNode &rhs) {
-    visited = rhs.visited;
-    name = rhs.name;
-    left = rhs.left;
-    right = rhs.right;
-    weight = rhs.weight;
-}
-
 bool MapNode::operator==(MapNode const &rhs) const {
     if (name != rhs.name)
         return false;
