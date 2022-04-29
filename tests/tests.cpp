@@ -63,7 +63,7 @@ TEST_CASE("Map Node") {
 }
 
 TEST_CASE("Path Finder") {
-    string map_string = "{\"Map\": {\"A\": [{\"B\": 3}, {\"C\": 1}], \"B\": [{\"D\": 2}], \"C\": [{\"B\": 1}, {\"D\": 5}], \"D\": [] }}";
+    string map_string = "{\"MapData\": {\"A\": {\"B\": 3, \"C\": 1}, \"B\": {\"D\": 2}, \"C\": {\"B\": 1, \"D\": 5}, \"D\": {} }}";
     SECTION("JSON map") {
         // Create JSON object
         json json_map = json::parse(map_string);
