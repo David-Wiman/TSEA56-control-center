@@ -16,6 +16,7 @@ public:
 
 private:
     std::vector<int> drive_mission;
+    std::vector<MapNode*> drive_mission_nodes;
 
 };
 

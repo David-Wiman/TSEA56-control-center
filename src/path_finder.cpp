@@ -123,9 +123,7 @@ void PathFinder::solve(string start_node_name, string stop_node_name) {
             if (!(left_neighbour->is_visited())) {
                 nodes_to_visit.push_back(left_neighbour);
             }
-        }
-
-        if (right_neighbour != nullptr) {
+        } else if (right_neighbour != nullptr) {
             if (!(right_neighbour->is_visited())) {
                 nodes_to_visit.push_back(right_neighbour);
             }
@@ -134,6 +132,19 @@ void PathFinder::solve(string start_node_name, string stop_node_name) {
 
     /* Sort nodes by increasing node-weight */
     nodes.sort(Comparator());
+
+    for (auto n : nodes) {
+        cout << n->get_name();
+        if (n->get_left().node != nullptr) {
+            cout << "[" << n->get_left().node->get_name() << "]";
+        }
+        if (n->get_right().node != nullptr) {
+            cout << "[" << n->get_right().node->get_name() << "] ";
+        } else {
+            cout << " ";
+        }
+    }
+    cout << endl;
 
     DriveMissionGenerator drive_mission_generator{nodes, stop_node_name};
     drive_mission = drive_mission_generator.get_drive_mission();
