@@ -1,5 +1,5 @@
 /*
- * Use PathFinder() + update_map(json m) + 
+ * Use PathFinder() + update_map(json m) +
  * solve(std::string start_node_name) + get_drive_mission()
  * OR
  * Use PathFinder(json m, std::string start_node_name) +
@@ -8,7 +8,7 @@
  * Use PathFinder(list<MapNode*> map_nodes, std::string start_node_name) +
  * get_drive_mission()
  */
- 
+
 #ifndef DIJKSTRA_SOLVER_H
 #define DIJKSTRA_SOLVER_H
 
@@ -45,7 +45,7 @@ public:
     void make_MapNode_list(json m);
 
 private:
-    MapNode* initiate_map_graph(std::string &start_node_name);
+    MapNode *initiate_map_graph(std::string &start_node_name);
     std::list<MapNode*> nodes;
     std::vector<int> drive_mission{};
 

@@ -31,7 +31,7 @@ DriveMissionGenerator::DriveMissionGenerator(list<MapNode*> optimal_route)
             } else {
                 drive_mission.push_back(control::right);
             }
-        } 
+        }
     }
 }
 

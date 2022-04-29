@@ -30,7 +30,7 @@ PathFinder::PathFinder(list<MapNode*> map_nodes, std::string start_node_name) {
 }
 
 PathFinder::~PathFinder() {
-    for (MapNode* ptr : nodes) {
+    for (MapNode *ptr : nodes) {
         delete ptr;
     }
 }
@@ -56,7 +56,7 @@ void PathFinder::solve(string start_node_name) {
                 left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
             }
         }
-        
+
         // Update right neighbour's weight if bigger than active nodes weight + edge weight
         MapNode *right_neighbour = active_node->get_right().node;
         if (!(right_neighbour == nullptr)) {
@@ -70,7 +70,7 @@ void PathFinder::solve(string start_node_name) {
             if (!(left_neighbour->is_visited())) {
                 nodes_to_visit.push_back(left_neighbour);
             }
-        } 
+        }
 
         if (!(right_neighbour == nullptr)) {
             if (!(right_neighbour->is_visited())) {
@@ -92,13 +92,13 @@ void PathFinder::update_map(json m) {
     make_MapNode_list(m);
 }
 
-/* 
+/*
  * Set all non-starting-node-weights to UINT_MAX and as unvisited,
  * set starting node weight to 0. Returns starting node
  */
-MapNode* PathFinder::initiate_map_graph(string &start_node_name) {
-    MapNode* start_node{};
-    for (MapNode* node : nodes) {
+MapNode *PathFinder::initiate_map_graph(string &start_node_name) {
+    MapNode *start_node{};
+    for (MapNode *node : nodes) {
         if (node->get_name() != start_node_name) {
             node->set_weight(UINT_MAX);
             node->set_visited(false);
