@@ -214,12 +214,12 @@ TEST_CASE("Control Center") {
 
         // Straight road
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == drive_mode::auto_nominal);
+        CHECK(ref.regulation_mode == regulation_mode::auto_nominal);
 
         // Bad lateral data from image processing module
         image_processing_status_code = 1;
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == drive_mode::auto_critical);
+        CHECK(ref.regulation_mode == regulation_mode::auto_critical);
 
 
         // Finish straight part, enter intersection
@@ -230,7 +230,7 @@ TEST_CASE("Control Center") {
 
         // Intersection
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
-        CHECK(ref.drive_mode == drive_mode::auto_critical);
+        CHECK(ref.regulation_mode == regulation_mode::auto_critical);
     }
     SECTION("image_proc_t") {
         ControlCenter control_center{};
@@ -247,7 +247,7 @@ TEST_CASE("Control Center") {
         control_center.add_drive_instruction(instruction::forward, "1");
         reference_t ref = control_center(sensor_data, image_data);
         CHECK(control_center.get_state() == state::running);
-        CHECK(ref.drive_mode == drive_mode::auto_nominal);
+        CHECK(ref.regulation_mode == regulation_mode::auto_nominal);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(ref.angle == 0);
     }

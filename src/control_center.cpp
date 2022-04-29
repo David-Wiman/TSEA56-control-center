@@ -42,7 +42,7 @@ reference_t ControlCenter::operator()(
     ss << "obstacle_distance: " << obstacle_distance
        << ", stop_distance: " << stop_distance;
     Logger::log(DEBUG, __FILE__, "ControlCenter()", ss.str());
-    reference_t reference = {0, 0, drive_mode::auto_nominal};
+    reference_t reference = {0, 0, regulation_mode::auto_nominal};
 
     if (stop_distance == -1)
         stop_distance = 1000;
@@ -51,9 +51,9 @@ reference_t ControlCenter::operator()(
 
     // Drive mode
     if ((state == state::running_in_intersection) || image_processing_status_code != 0) {
-        reference.drive_mode = drive_mode::auto_critical;
+        reference.regulation_mode = regulation_mode::auto_critical;
     } else {
-        reference.drive_mode = drive_mode::auto_nominal;
+        reference.regulation_mode = regulation_mode::auto_nominal;
     }
 
     reference.angle = calculate_angle(left_angle, right_angle);
@@ -62,7 +62,7 @@ reference_t ControlCenter::operator()(
     ss.str("");
     ss << "angle = " << reference.angle
        << ", speed = " << reference.speed
-       << ", drive mode = " << reference.drive_mode;
+       << ", drive mode = " << reference.regulation_mode;
     Logger::log(DEBUG, __FILE__, "reference", ss.str());
 
     return reference;
