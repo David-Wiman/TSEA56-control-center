@@ -86,6 +86,7 @@ TEST_CASE("Path Finder") {
         CHECK(drive_mission[2] == 1);
     }
     SECTION("Get current drive mission") {
+        Logger::init();
         // Create JSON object
         json json_map = json::parse(map_string);
         // Create a PathFinder, finds best node order, vectorize instructions
@@ -97,6 +98,7 @@ TEST_CASE("Path Finder") {
         CHECK(finder.get_current_drive_instruction() == 0);
         finder.done_with_drive_instruction();
         CHECK(finder.get_current_drive_instruction() == 1);
+        Logger::close();
     }
 }
 
