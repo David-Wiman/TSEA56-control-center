@@ -10,6 +10,7 @@
 class DriveMissionGenerator {
 public:
     DriveMissionGenerator(std::list<MapNode*> optimal_route);
+    DriveMissionGenerator(std::list<MapNode*> optimal_route, std::string stop_node_name);
 
     std::vector<int> get_drive_mission();
 

@@ -35,7 +35,7 @@ PathFinder::~PathFinder() {
     }
 }
 
-/* Set drive_mission */
+/* Set drive_mission for entire graph*/
 void PathFinder::solve(string start_node_name) {
     // Inititate map
     MapNode *active_node = initiate_map_graph(start_node_name);
@@ -66,13 +66,13 @@ void PathFinder::solve(string start_node_name) {
         }
 
         // Add nodes to nodes_to_visit list if they are not already visited
-        if (!(left_neighbour == nullptr)) {
+        if (left_neighbour != nullptr) {
             if (!(left_neighbour->is_visited())) {
                 nodes_to_visit.push_back(left_neighbour);
             }
         }
 
-        if (!(right_neighbour == nullptr)) {
+        if (right_neighbour != nullptr) {
             if (!(right_neighbour->is_visited())) {
                 nodes_to_visit.push_back(right_neighbour);
             }
@@ -83,6 +83,59 @@ void PathFinder::solve(string start_node_name) {
     nodes.sort(Comparator());
 
     DriveMissionGenerator drive_mission_generator{nodes};
+    drive_mission = drive_mission_generator.get_drive_mission();
+    Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");
+}
+
+/* Sets drive_mission for a limited Drive Mission */
+void PathFinder::solve(string start_node_name, string stop_node_name) {
+    // Inititate map
+    MapNode *active_node = initiate_map_graph(start_node_name);
+    // Place start node as first to visit
+    std::list<MapNode*> nodes_to_visit{active_node};
+
+    // Set new starting-node and remove from list
+    while (!(nodes_to_visit.empty())) {
+        // Make sure the node with the lowest weight is searched first
+        nodes_to_visit.sort(Comparator());
+        active_node = nodes_to_visit.front();
+        nodes_to_visit.pop_front();
+        active_node->set_visited(true);
+
+        // Update left neighbour's weight if bigger than active nodes weight + edge weight
+        MapNode *left_neighbour = active_node->get_left().node;
+        if (!(left_neighbour == nullptr)) {
+            if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
+                left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
+            }
+        }
+
+        // Update right neighbour's weight if bigger than active nodes weight + edge weight
+        MapNode *right_neighbour = active_node->get_right().node;
+        if (!(right_neighbour == nullptr)) {
+            if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
+                right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
+            }
+        }
+
+        // Add nodes to nodes_to_visit list if they are not already visited
+        if (left_neighbour != nullptr) {
+            if (!(left_neighbour->is_visited())) {
+                nodes_to_visit.push_back(left_neighbour);
+            }
+        }
+
+        if (right_neighbour != nullptr) {
+            if (!(right_neighbour->is_visited())) {
+                nodes_to_visit.push_back(right_neighbour);
+            }
+        }
+    }
+
+    /* Sort nodes by increasing node-weight */
+    nodes.sort(Comparator());
+
+    DriveMissionGenerator drive_mission_generator{nodes, stop_node_name};
     drive_mission = drive_mission_generator.get_drive_mission();
     Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");
 }
