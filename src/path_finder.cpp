@@ -12,20 +12,20 @@ using namespace std;
 using json = nlohmann::json;
 
 PathFinder::PathFinder() {
-    Logger::log(DEBUG, "path_finder.cpp", "constructor", "PathFinder created");
+    Logger::log(DEBUG, __FILE__, "constructor", "PathFinder created");
 }
 
 PathFinder::PathFinder(json m, std::string start_node_name) {
-    Logger::log(DEBUG, "path_finder.cpp", "constructor", "PathFinder created");
+    Logger::log(DEBUG, __FILE__, "constructor", "PathFinder created");
     make_MapNode_list(m);
-    Logger::log(DEBUG, "path_finder.cpp", "make_MapNode_list", "Successfuly created list of MapNode*");
+    Logger::log(DEBUG, __FILE__, "make_MapNode_list", "Successfuly created list of MapNode*");
     solve(start_node_name);
 }
 
 PathFinder::PathFinder(list<MapNode*> map_nodes, std::string start_node_name) {
-    Logger::log(DEBUG, "path_finder.cpp", "constructor", "PathFinder created");
+    Logger::log(DEBUG, __FILE__, "constructor", "PathFinder created");
     nodes = map_nodes;
-    Logger::log(DEBUG, "path_finder.cpp", "make_MapNode_list", "Successfuly set list of MapNode*");
+    Logger::log(DEBUG, __FILE__, "make_MapNode_list", "Successfuly set list of MapNode*");
     solve(start_node_name);
 }
 
@@ -84,7 +84,7 @@ void PathFinder::solve(string start_node_name) {
 
     DriveMissionGenerator drive_mission_generator{nodes};
     drive_mission = drive_mission_generator.get_drive_mission();
-    Logger::log(DEBUG, "path_finder.cpp", "solve", "Ordered vector of drive instructions created");
+    Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");
 }
 
 /* Sets nodes */
@@ -108,7 +108,7 @@ MapNode *PathFinder::initiate_map_graph(string &start_node_name) {
             start_node = node;
         }
     }
-    Logger::log(DEBUG, "path_finder.cpp", "initiate_map_graph", "Map initiated");
+    Logger::log(DEBUG, __FILE__, "initiate_map_graph", "Map initiated");
     return start_node;
 }
 
