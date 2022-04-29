@@ -39,15 +39,19 @@ public:
     PathFinder operator=(PathFinder const&) = delete;
 
     void solve(std::string start_node_name);
-
     std::vector<int> get_drive_mission();
     void update_map(json m);
     void make_MapNode_list(json m);
+
+    void reset_progress();
+    void done_with_drive_instruction();
+    int get_current_drive_instruction();
 
 private:
     MapNode *initiate_map_graph(std::string &start_node_name);
     std::list<MapNode*> nodes;
     std::vector<int> drive_mission{};
+    int nodes_passed{};
 
 };
 

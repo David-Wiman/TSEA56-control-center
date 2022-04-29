@@ -97,6 +97,7 @@ void PathFinder::update_map(json m) {
  * set starting node weight to 0. Returns starting node
  */
 MapNode *PathFinder::initiate_map_graph(string &start_node_name) {
+    reset_progress();
     MapNode *start_node{};
     for (MapNode *node : nodes) {
         if (node->get_name() != start_node_name) {
@@ -144,4 +145,16 @@ void PathFinder::make_MapNode_list(json json_map) {
             }
         }
     }
+}
+
+void PathFinder::reset_progress() {
+    nodes_passed = 0;
+}
+
+void PathFinder::done_with_drive_instruction() {
+    nodes_passed += 1;
+}
+
+int PathFinder::get_current_drive_instruction() {
+    return drive_mission[nodes_passed];
 }

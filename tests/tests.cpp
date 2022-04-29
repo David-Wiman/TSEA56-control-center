@@ -80,10 +80,23 @@ TEST_CASE("Path Finder") {
         // Create a PathFinder, finds best node order, vectorize instructions
         PathFinder finder{json_map, "A"};
         vector<int> drive_mission = finder.get_drive_mission();
-        // Print for debugging
+
         CHECK(drive_mission[0] == 2);
         CHECK(drive_mission[1] == 0);
         CHECK(drive_mission[2] == 1);
+    }
+    SECTION("Get current drive mission") {
+        // Create JSON object
+        json json_map = json::parse(map_string);
+        // Create a PathFinder, finds best node order, vectorize instructions
+        PathFinder finder{json_map, "A"};
+        vector<int> drive_mission = finder.get_drive_mission();
+
+        CHECK(finder.get_current_drive_instruction() == 2);
+        finder.done_with_drive_instruction();
+        CHECK(finder.get_current_drive_instruction() == 0);
+        finder.done_with_drive_instruction();
+        CHECK(finder.get_current_drive_instruction() == 1);
     }
 }
 
