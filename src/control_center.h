@@ -7,8 +7,8 @@
 #include <string>
 #include <list>
 
-#define DEFAULT_SPEED 10
-#define STOP_DISTANCE_CLOSE 30
+#define DEFAULT_SPEED 500
+#define STOP_DISTANCE_CLOSE 90
 #define STOP_DISTANCE_FAR 100
 
 namespace state {

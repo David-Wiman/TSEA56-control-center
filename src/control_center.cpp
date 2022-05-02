@@ -47,6 +47,9 @@ reference_t ControlCenter::operator()(
     if (stop_distance == -1)
         stop_distance = 1000;
 
+    if (obstacle_distance == 0)
+        obstacle_distance = 1000;
+
     update_state(obstacle_distance, stop_distance);
 
     // Drive mode
