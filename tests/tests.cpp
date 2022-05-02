@@ -112,7 +112,7 @@ TEST_CASE("Path Finder") {
         json json_map = json::parse(map_string);  
         PathFinder finder{};
         finder.update_map(json_map);
-        finder.solve("A1", "A2");
+        finder.solve("A1", "G1");
         vector<int> drive_mission = finder.get_drive_mission();
         cout << "  ";
         for (auto n : drive_mission) {
