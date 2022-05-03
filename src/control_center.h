@@ -8,8 +8,9 @@
 #include <list>
 
 #define DEFAULT_SPEED 500
-#define STOP_DISTANCE_CLOSE 90
+#define STOP_DISTANCE_CLOSE 40
 #define STOP_DISTANCE_FAR 100
+#define OBST_DISTANCE_CLOSE 90
 
 namespace state {
     enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
@@ -55,7 +56,7 @@ private:
     void finish_instruction();
 
     inline bool path_blocked(int obstacle_distance) {
-        return obstacle_distance <= STOP_DISTANCE_CLOSE;
+        return obstacle_distance <= OBST_DISTANCE_CLOSE;
     }
 
     /* Return true if the car is at a stop line (which it have not been at
