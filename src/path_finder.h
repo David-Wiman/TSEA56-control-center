@@ -40,6 +40,7 @@ public:
 
     void solve(std::string start_node_name);
     void solve(std::string start_node_name, std::string stop_node_name);
+    void find_path(MapNode *neighbour, std::string stop_node_name);
     std::vector<int> get_drive_mission();
     void update_map(json m);
     void make_MapNode_list(json m);

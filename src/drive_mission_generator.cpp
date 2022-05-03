@@ -52,57 +52,48 @@ DriveMissionGenerator::DriveMissionGenerator(list<MapNode*> optimal_route)
     }
 }
 
-DriveMissionGenerator::DriveMissionGenerator(list<MapNode*> optimal_route, string stop_node_name)
+DriveMissionGenerator::DriveMissionGenerator(vector<MapNode*> nodes_vector, string stop_node_name)
 : drive_mission{}, drive_mission_nodes{} {
-    // Copy list content to a vector for random-access
-    vector<MapNode*> optimal_route_vector(optimal_route.size());
-    std::copy(optimal_route.begin(), optimal_route.end(), optimal_route_vector.begin());  
-
-    // Sort optimal_route_vector in a drivable order
+    // Sort nodes_vector in a drivable order
      int i = 0;
      int k = 0;
-    while (i < optimal_route_vector.size()-1) {
-        if (optimal_route_vector[i]->get_left().node != nullptr) {
+    while (i < nodes_vector.size()-1) {
+        if (nodes_vector[i]->get_left().node != nullptr) {
             // Left exists
-            if (optimal_route_vector[i]->get_left().node->get_name() != optimal_route_vector[i+1]->get_name()) {
+            if (nodes_vector[i]->get_left().node->get_name() != nodes_vector[i+1]->get_name()) {
                 // Left is not correct
-                if (optimal_route_vector[i]->get_right().node != nullptr) {
+                if (nodes_vector[i]->get_right().node != nullptr) {
                     // Right exists
-                    if (optimal_route_vector[i]->get_right().node->get_name() != optimal_route_vector[i+1]->get_name()) {
+                    if (nodes_vector[i]->get_right().node->get_name() != nodes_vector[i+1]->get_name()) {
                         // Right is not correct
-                        optimal_route_vector.push_back(optimal_route_vector[i]);
-                        optimal_route_vector.erase(optimal_route_vector.begin()+i);
-                        // swap(optimal_route_vector[i],optimal_route_vector[i+1]);
+                        nodes_vector.push_back(nodes_vector[i]);
+                        nodes_vector.erase(nodes_vector.begin()+i);
+                        // swap(nodes_vector[i],nodes_vector[i+1]);
                     } else {}
                 } else {
-                    optimal_route_vector.push_back(optimal_route_vector[i]);
-                    optimal_route_vector.erase(optimal_route_vector.begin()+i);
-                    // swap(optimal_route_vector[i],optimal_route_vector[i+1]);
+                    nodes_vector.push_back(nodes_vector[i]);
+                    nodes_vector.erase(nodes_vector.begin()+i);
+                    // swap(nodes_vector[i],nodes_vector[i+1]);
                 }
             }
         }
         if (k == 6) {
             break;
         }
-        if (i == optimal_route_vector.size()-1) {
+        if (i == nodes_vector.size()-1) {
             k += 1;
         } else {
             i++;
         }
     }
 
-    for (auto n : optimal_route_vector) {
-        cout << n->get_name() << " ";
-    }
-    cout << endl;
-
-    MapNode *active_node = optimal_route_vector[0];
+    MapNode *active_node = nodes_vector[0];
 
     // For every element in vector
-    for (unsigned int i = 0; i < optimal_route_vector.size()-1; i++) {
+    for (unsigned int i = 0; i < nodes_vector.size()-1; i++) {
 
         // Get active node and the of the following node
-        MapNode *next_node = optimal_route_vector[i+1];
+        MapNode *next_node = nodes_vector[i+1];
         string next_node_name = next_node->get_name();
 
         // Shorter names

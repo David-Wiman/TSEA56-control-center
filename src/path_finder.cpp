@@ -92,6 +92,8 @@ void PathFinder::solve(string start_node_name) {
 void PathFinder::solve(string start_node_name, string stop_node_name) {
     // Inititate map
     MapNode *active_node = initiate_map_graph(start_node_name);
+    active_node->set_parent_node(nullptr);
+
     // Place start node as first to visit
     std::list<MapNode*> nodes_to_visit{active_node};
 
@@ -105,24 +107,36 @@ void PathFinder::solve(string start_node_name, string stop_node_name) {
 
         // Update left neighbour's weight if bigger than active nodes weight + edge weight
         MapNode *left_neighbour = active_node->get_left().node;
-        if (!(left_neighbour == nullptr)) {
+        if (left_neighbour != nullptr) {
             if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
                 left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
+                left_neighbour->set_parent_node(active_node);
+                active_node->set_child_node(left_neighbour);
+                if (left_neighbour->get_name() == stop_node_name) {
+                    find_path(left_neighbour, stop_node_name);
+                    break;
+                }
             }
         }
 
         // Update right neighbour's weight if bigger than active nodes weight + edge weight
         MapNode *right_neighbour = active_node->get_right().node;
-        if (!(right_neighbour == nullptr)) {
+        if (right_neighbour != nullptr) {
             if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
                 right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
+                right_neighbour->set_parent_node(active_node);
+                active_node->set_child_node(right_neighbour);
+                if (right_neighbour->get_name() == stop_node_name) {
+                    find_path(right_neighbour, stop_node_name);
+                    break;
+                }
             }
         }
 
         // Add nodes to nodes_to_visit list if they are not already visited
         if (left_neighbour != nullptr) {
             if (!(left_neighbour->is_visited())) {
-                nodes_to_visit.push_back(left_neighbour);
+                    nodes_to_visit.push_back(left_neighbour);
             }
         } // Else if here to only add one path
         if (right_neighbour != nullptr) {
@@ -131,13 +145,6 @@ void PathFinder::solve(string start_node_name, string stop_node_name) {
             }
         }
     }
-
-    /* Sort nodes by increasing node-weight */
-    nodes.sort(Comparator());
-
-    DriveMissionGenerator drive_mission_generator{nodes, stop_node_name};
-    drive_mission = drive_mission_generator.get_drive_mission();
-    Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");
 }
 
 /* Sets nodes */
@@ -187,8 +194,9 @@ void PathFinder::make_MapNode_list(json json_map) {
         // For all neighbouring nodes
         for (auto &edge : node.value().items()) {
             // Get neighbours name and edge-weight
-            string neighbour_name = edge.key();
-            int neightbour_distance = edge.value();
+            cout << edge.value() << endl;
+            string neighbour_name = edge.value().front().begin().key();
+            int neightbour_distance = edge.value().front().begin().value();
 
             // Find the node that matches neighbour_name
             auto found = std::find_if(nodes.begin(), nodes.end(), [&] (MapNode *ptr) {return ptr->get_name() == neighbour_name; });
@@ -210,4 +218,16 @@ void PathFinder::done_with_drive_instruction() {
 
 int PathFinder::get_current_drive_instruction() {
     return drive_mission[nodes_passed];
+}
+
+void PathFinder::find_path(MapNode *neighbour, string stop_node_name) {
+    vector<MapNode*> new_nodes_vector{};
+    new_nodes_vector.push_back(neighbour);
+    while (new_nodes_vector.front()->get_parent_node() != nullptr) {
+        new_nodes_vector.insert(new_nodes_vector.begin(), new_nodes_vector.front()->get_parent_node());
+    }
+
+    DriveMissionGenerator drive_mission_generator{new_nodes_vector, stop_node_name};
+    drive_mission = drive_mission_generator.get_drive_mission();
+    Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");
 }

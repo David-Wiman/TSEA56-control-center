@@ -46,8 +46,22 @@ public:
     bool is_visited() const {
         return visited;
     }
+    void set_parent_node(MapNode *parent) {
+        parent_node = parent;
+    }
+    MapNode* get_parent_node() {
+        return parent_node;
+    }
+    void set_child_node(MapNode *child) {
+        child_node = child;
+    }
+    MapNode* get_child_node() {
+        return child_node;
+    }
 
 private:
+    MapNode *parent_node{};
+    MapNode *child_node{nullptr};
     bool visited{};
     std::string name;
     Edge left;
