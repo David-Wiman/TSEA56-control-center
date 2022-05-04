@@ -37,16 +37,16 @@ DriveMissionGenerator::DriveMissionGenerator(list<MapNode*> optimal_route)
 
         if ((!left_neighbour_exist) != (!right_neighbour_exist)) {
             // If exactly one of the neighbours exist, push_back forward
-            drive_mission.push_back(control::forward);
+            drive_mission.push_back(instruction::forward);
         } else if ((left_neighbour_exist) && (right_neighbour_exist)) {
             // Both neighbours exist
             string left_neighbour_name = optimal_route_vector[i]->get_left().node->get_name();
             string right_neighbour_name = optimal_route_vector[i]->get_right().node->get_name();
             if (left_neighbour_name == next_node_name) {
                 // If next node matches name, push_back direction
-                drive_mission.push_back(control::left);
+                drive_mission.push_back(instruction::left);
             } else {
-                drive_mission.push_back(control::right);
+                drive_mission.push_back(instruction::right);
             }
         }
     }
@@ -103,7 +103,7 @@ DriveMissionGenerator::DriveMissionGenerator(vector<MapNode*> nodes_vector, stri
         if ((!left_neighbour_exist) != (!right_neighbour_exist)) {
             // If exactly one of the neighbours exist, push_back "forward"
             if (next_node_name == active_node->get_left().node->get_name()) {
-                drive_mission.push_back(control::forward);
+                drive_mission.push_back(instruction::forward);
                 active_node = next_node;
             }
             if (next_node_name == stop_node_name) {
@@ -116,13 +116,13 @@ DriveMissionGenerator::DriveMissionGenerator(vector<MapNode*> nodes_vector, stri
             string right_neighbour_name = active_node->get_right().node->get_name();
             if (left_neighbour_name == next_node_name) {
                 // If next node matches name, push_back direction
-                drive_mission.push_back(control::left);
+                drive_mission.push_back(instruction::left);
                 active_node = next_node;
                 if (next_node_name == stop_node_name) {
                     return;
                 }
             } else if (right_neighbour_name == next_node_name) {
-                drive_mission.push_back(control::right);
+                drive_mission.push_back(instruction::right);
                 active_node = next_node;
                 if (next_node_name == stop_node_name) {
                     return;
