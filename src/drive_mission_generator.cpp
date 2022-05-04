@@ -55,7 +55,7 @@ DriveMissionGenerator::DriveMissionGenerator(list<MapNode*> optimal_route)
 DriveMissionGenerator::DriveMissionGenerator(vector<MapNode*> nodes_vector, string stop_node_name)
 : drive_mission{}, drive_mission_nodes{} {
     // Sort nodes_vector in a drivable order
-     int i = 0;
+     unsigned int i = 0;
      int k = 0;
     while (i < nodes_vector.size()-1) {
         if (nodes_vector[i]->get_left().node != nullptr) {

@@ -36,7 +36,8 @@ PathFinder::~PathFinder() {
     }
 }
 
-/* Set drive_mission for entire graph*/
+/* Set drive_mission for entire graph */
+/* Not for normal use */
 void PathFinder::solve(string start_node_name) {
     // Inititate map
     MapNode *active_node = initiate_map_graph(start_node_name);
@@ -138,7 +139,7 @@ void PathFinder::solve(string start_node_name, string stop_node_name) {
             if (!(left_neighbour->is_visited())) {
                     nodes_to_visit.push_back(left_neighbour);
             }
-        } // Else if here to only add one path
+        }
         if (right_neighbour != nullptr) {
             if (!(right_neighbour->is_visited())) {
                 nodes_to_visit.push_back(right_neighbour);
@@ -176,6 +177,7 @@ vector<int> PathFinder::get_drive_mission() {
     return drive_mission;
 }
 
+/* Create the MapNode*s and add their edges */
 void PathFinder::make_MapNode_list(json json_map) {
     // Create MapNode pointers and places in "nodes"
     // Assumes json_map preserve order when iterating
@@ -207,18 +209,18 @@ void PathFinder::make_MapNode_list(json json_map) {
     }
 }
 
+/* Find current drive instruction */
 void PathFinder::reset_progress() {
     nodes_passed = 0;
 }
-
 void PathFinder::done_with_drive_instruction() {
     nodes_passed += 1;
 }
-
 int PathFinder::get_current_drive_instruction() {
     return drive_mission[nodes_passed];
 }
 
+/* Trace back from stop node to start node */
 void PathFinder::find_path(MapNode *neighbour, string stop_node_name) {
     vector<MapNode*> new_nodes_vector{};
     new_nodes_vector.push_back(neighbour);
@@ -226,6 +228,7 @@ void PathFinder::find_path(MapNode *neighbour, string stop_node_name) {
         new_nodes_vector.insert(new_nodes_vector.begin(), new_nodes_vector.front()->get_parent_node());
     }
 
+    // Generate drive instructions based on node vector
     DriveMissionGenerator drive_mission_generator{new_nodes_vector, stop_node_name};
     drive_mission = drive_mission_generator.get_drive_mission();
     Logger::log(DEBUG, __FILE__, "solve", "Ordered vector of drive instructions created");

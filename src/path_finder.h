@@ -51,7 +51,7 @@ public:
 
 private:
     MapNode *initiate_map_graph(std::string &start_node_name);
-    std::list<MapNode*> nodes;
+    std::list<MapNode*> nodes{};
     std::vector<int> drive_mission{};
     int nodes_passed{};
 
