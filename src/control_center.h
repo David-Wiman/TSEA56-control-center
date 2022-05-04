@@ -19,8 +19,8 @@ namespace state {
 class ControlCenter {
 public:
     ControlCenter();
-    //void set_new_map(MapGraph* mapgraph);
-    void set_position(MapNode* mapnode);
+    //void set_new_map(MapGraph *mapgraph);
+    void set_position(MapNode *mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
 
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);

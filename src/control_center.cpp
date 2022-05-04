@@ -12,11 +12,11 @@ ControlCenter::ControlCenter(): state{state::stoped_at_node} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
-/*void ControlCenter::set_new_map(MapGraph* map_graph) {
+/*void ControlCenter::set_new_map(MapGraph *map_graph) {
 
 }*/
 
-void ControlCenter::set_position(MapNode* map_node) {
+void ControlCenter::set_position(MapNode *map_node) {
 
 }
 
