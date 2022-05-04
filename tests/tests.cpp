@@ -85,7 +85,7 @@ TEST_CASE("Path Finder") {
         CHECK(drive_mission[1] == 0);
         CHECK(drive_mission[2] == 1);
     }
-    SECTION("Get current drive mission") {
+    SECTION("Get current drive mission and road segment") {
         Logger::init();
         // Create JSON object
         json json_map = json::parse(map_string);
@@ -94,10 +94,14 @@ TEST_CASE("Path Finder") {
         vector<int> drive_mission = finder.get_drive_mission();
 
         CHECK(finder.get_current_drive_instruction() == 2);
+        CHECK(finder.get_current_road_segment() == "AC");
         finder.done_with_drive_instruction();
         CHECK(finder.get_current_drive_instruction() == 0);
+        CHECK(finder.get_current_road_segment() == "CB");
         finder.done_with_drive_instruction();
         CHECK(finder.get_current_drive_instruction() == 1);
+        CHECK(finder.get_current_road_segment() == "BD");
+        finder.done_with_drive_instruction();
         Logger::close();
     }
     SECTION("Limited Solve") {
@@ -114,6 +118,19 @@ TEST_CASE("Path Finder") {
         finder.update_map(json_map);
         finder.solve("L2", "L1");
         vector<int> drive_mission = finder.get_drive_mission();
+    }
+    SECTION("Multiple drive missions on large Map") {
+        string map_string = "{\"MapData\":{\"A1\":[{\"K1\":5}],\"A2\":[{\"B2\":1}],\"B1\":[{\"A1\":1}],\"B2\":[{\"L2\":2},{\"C2\":2}],\"C1\":[{\"B1\":2},{\"L2\":2}],\"C2\":[{\"D2\":1}],\"D1\":[{\"C1\":1}],\"D2\":[{\"E2\":1}],\"E1\":[{\"D1\":1}],\"E2\":[{\"F2\":2}],\"F1\":[{\"E1\":2}],\"F2\":[{\"G2\":3}],\"G1\":[{\"F1\":3}],\"G2\":[{\"H2\":1}],\"H1\":[{\"G1\":1}],\"H2\":[{\"M1\":2},{\"I2\":2}],\"I1\":[{\"H1\":2},{\"M1\":2}],\"I2\":[{\"J2\":1}],\"J1\":[{\"I1\":1}],\"J2\":[{\"K2\":1}],\"K1\":[{\"J1\":1}],\"K2\":[{\"A2\":5}],\"L1\":[{\"C2\":2},{\"B1\":2}],\"L2\":[{\"M2\":1}],\"M1\":[{\"L1\":1}],\"M2\":[{\"I2\":2},{\"H1\":2}]}}";
+        json json_map = json::parse(map_string); 
+        PathFinder finder{};
+        vector<int> drive_mission{};
+        finder.update_map(json_map);
+        finder.solve("L2", "L1");
+        drive_mission = finder.get_drive_mission();
+        finder.solve("L1", "G1");
+        drive_mission = finder.get_drive_mission();
+        finder.solve("G1", "J2");
+        drive_mission = finder.get_drive_mission();
     }
 }
 

@@ -3,6 +3,7 @@
 #include "log.h"
 
 #include <list>
+#include <vector>
 #include <string>
 #include <sstream>
 
@@ -11,10 +12,6 @@ using namespace std;
 ControlCenter::ControlCenter(): state{state::stoped_at_node} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
-
-/*void ControlCenter::set_new_map(MapGraph *map_graph) {
-
-}*/
 
 void ControlCenter::set_position(MapNode *map_node) {
 
@@ -182,10 +179,16 @@ void ControlCenter::finish_instruction() {
     string id = drive_instructions.front().id;
     drive_instructions.pop_front();
     finished_id_buffer.push_back(id);
+    path_finder.done_with_drive_instruction();
 }
 
 std::string ControlCenter::get_position() {
     return "";
+}
+
+
+string ControlCenter::get_current_road_segment() {
+    return path_finder.get_current_road_segment();
 }
 
 int ControlCenter::calculate_speed() {

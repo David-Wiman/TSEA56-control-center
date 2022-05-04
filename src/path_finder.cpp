@@ -216,8 +216,21 @@ void PathFinder::reset_progress() {
 void PathFinder::done_with_drive_instruction() {
     nodes_passed += 1;
 }
+int PathFinder::get_nodes_passed() {
+    return nodes_passed;
+}
 int PathFinder::get_current_drive_instruction() {
     return drive_mission[nodes_passed];
+}
+/* Returns string with edge identification e.g. "A1K1" meaning from A1 to K1 */
+string PathFinder::get_current_road_segment() {
+    // Copy nodes in to nodes_vector
+    vector<MapNode*> nodes_vector(nodes.size());
+    std::copy(nodes.begin(), nodes.end(), nodes_vector.begin());
+    // Names of node just passed and node we're heading towards
+    string from = nodes_vector[nodes_passed]->get_name();
+    string to = nodes_vector[nodes_passed+1]->get_name();
+    return from + to;
 }
 
 /* Trace back from stop node to start node */

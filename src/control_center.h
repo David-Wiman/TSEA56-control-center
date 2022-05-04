@@ -2,6 +2,8 @@
 #define CONTROLCENTER_H
 
 #include "map_node.h"
+#include "path_finder.h"
+#include "drive_mission_generator.h"
 #include "raspi_common.h"
 
 #include <string>
@@ -40,6 +42,7 @@ public:
     }
 
     std::string get_position();
+    std::string get_current_road_segment();
 
     /* Return 0 if no new instruction have been finished. */
     std::string get_finished_instruction_id();
@@ -71,13 +74,14 @@ private:
     /* Call after update_state(). */
     int calculate_angle(int left_angle, int right_angle);
 
-    //MapGraph map;
     std::list<int> obstacle_distance_buffer{};
     std::list<int> stop_distance_buffer{};
     enum state::ControlState state;
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
     bool have_stoped{false};
+
+    PathFinder path_finder{};
 };
 
 #endif // CONTROLCENTER_H

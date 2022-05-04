@@ -47,7 +47,9 @@ public:
 
     void reset_progress();
     void done_with_drive_instruction();
+    int get_nodes_passed();
     int get_current_drive_instruction();
+    std::string get_current_road_segment();
 
 private:
     MapNode *initiate_map_graph(std::string &start_node_name);
