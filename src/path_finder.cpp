@@ -194,9 +194,8 @@ void PathFinder::make_MapNode_list(json json_map) {
         // For all neighbouring nodes
         for (auto &edge : node.value().items()) {
             // Get neighbours name and edge-weight
-            cout << edge.value() << endl;
-            string neighbour_name = edge.value().front().begin().key();
-            int neightbour_distance = edge.value().front().begin().value();
+            string neighbour_name = edge.value().begin().key();
+            int neightbour_distance = edge.value().begin().value();
 
             // Find the node that matches neighbour_name
             auto found = std::find_if(nodes.begin(), nodes.end(), [&] (MapNode *ptr) {return ptr->get_name() == neighbour_name; });

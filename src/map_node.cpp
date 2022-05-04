@@ -20,10 +20,8 @@ void MapNode::set_right(int edge_weight, MapNode *node) {
 
 void MapNode::add_edge(int edge_weight, MapNode *node) {
     if (left.node == nullptr) {
-        cout << get_name() << " left: " << node->get_name() << endl;
         set_left(edge_weight, node);
     } else if (right.node == nullptr) {
-        cout << get_name() << " right: " << node->get_name() << endl;
         set_right(edge_weight, node);
     } else {
         Logger::log(WARNING, "map_node.cpp", "add_edge", "Try to add edge to non-existent node");
