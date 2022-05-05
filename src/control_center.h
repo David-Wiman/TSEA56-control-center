@@ -41,7 +41,6 @@ public:
         );
     }
 
-    std::string get_position();
     std::string get_current_road_segment();
 
     /* Return 0 if no new instruction have been finished. */

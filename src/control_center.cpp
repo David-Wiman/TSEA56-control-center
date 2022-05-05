@@ -182,11 +182,6 @@ void ControlCenter::finish_instruction() {
     path_finder.done_with_drive_instruction();
 }
 
-std::string ControlCenter::get_position() {
-    return "";
-}
-
-
 string ControlCenter::get_current_road_segment() {
     return path_finder.get_current_road_segment();
 }
