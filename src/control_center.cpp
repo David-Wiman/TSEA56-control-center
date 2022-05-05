@@ -238,6 +238,7 @@ int ControlCenter::calculate_speed() {
             return DEFAULT_SPEED;
 
         case state::stop_line:
+        case state::stopping:
         case state::blocked:
             return 0;
 
