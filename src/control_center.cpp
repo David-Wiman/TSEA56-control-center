@@ -9,7 +9,7 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(): state{state::stop_line} {
+ControlCenter::ControlCenter() {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -33,7 +33,7 @@ void ControlCenter::add_drive_instruction(instruction::InstructionNumber instruc
 }
 
 reference_t ControlCenter::operator()(
-        int obstacle_distance, int stop_distance,
+        int obstacle_distance, int stop_distance, int speed,
         int left_angle, int right_angle, int image_processing_status_code) {
     stringstream ss;
     ss << "obstacle_distance: " << obstacle_distance
@@ -47,7 +47,7 @@ reference_t ControlCenter::operator()(
     if (obstacle_distance == 0)
         obstacle_distance = 1000;
 
-    update_state(obstacle_distance, stop_distance);
+    update_state(obstacle_distance, stop_distance, speed);
 
     // Drive mode
     if ((state == state::intersection) || image_processing_status_code != 0) {
@@ -68,89 +68,134 @@ reference_t ControlCenter::operator()(
     return reference;
 }
 
-void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
-    drive_instruction_t instruction{};
+void ControlCenter::update_state(int obstacle_distance, int stop_distance, int speed) {
+    drive_instruction_t intr{};
 
     if (drive_instructions.empty()) {
         // No instruction
-        state = state::stop_line;
+        if (state != state::stop_line) {
+            Logger::log(ERROR, __FILE__, "Update state", "No instruction but state not stop_line");
+        }
+        if (speed > 0) {
+            state = state::stopping;
+            stop_reason = state::stop_line;
+        } else {
+            state = state::stop_line;
+        }
         return;
     } else {
-        instruction = drive_instructions.front();
+        intr = drive_instructions.front();
     }
 
-    if (instruction.number == instruction::stop) {
-        state = state::stop_line;
-        finish_instruction();
-        return;
-    }
+    //if (intr.number == instruction::stop) {
+        //if (speed > 0) {
+            //state = state::stopping;
+            //stop_reason = state::stop_line;
+        //} else {
+            //state = state::stop_line;
+            //finish_instruction();
+        //}
+        //return;
+    //}
 
     switch (state) {
         case state::normal:
         case state::intersection:
             if (path_blocked(obstacle_distance)) {
-                Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
-                state = state::blocked;
+                Logger::log(INFO, __FILE__, "Update state", "Path blocked, stopping");
+                state = state::stopping;
+                stop_reason = state::blocked;
             } else if (at_stop_line(stop_distance)) {
                 // At node
-                Logger::log(INFO, __FILE__, "ControlCenter", "At stop line");
-                finish_instruction();
-                state = get_new_state();
+                if (drive_instructions.size() > 1) {
+                    finish_instruction();
+                    set_new_state(speed);
+                } else {
+                    Logger::log(INFO, __FILE__, "Update state", "At stop line, stopping");
+                    finish_when_stopped = true;
+                    state = state::stopping;
+                    stop_reason = state::stop_line;
+                }
             } else {
                 // Clear path, don't change state
-                Logger::log(DEBUG, __FILE__, "ControlCenter", "Running");
+                Logger::log(DEBUG, __FILE__, "Update state", "Running");
             }
             break;
 
         case state::stop_line:
-            if (!path_blocked(obstacle_distance)) {
-                // The path isn't blocked
-                if (at_stop_line(stop_distance)) {
-                    Logger::log(ERROR, __FILE__, "ControlCenter", "Still at stop line");
-                } else {
-                    // No new stop line close
-                    Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive instruction");
-                    state = state::normal;
-                }
-            } else {
-                // The path is blocked
-                Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
+            if (path_blocked(obstacle_distance)) {
                 state = state::blocked;
+                Logger::log(INFO, __FILE__, "Update state", "Path blocked");
+                break;
             }
+            if (at_stop_line(stop_distance)) {
+                Logger::log(ERROR, __FILE__, "Update state", "Still at stop line");
+            }
+            set_new_state(speed);
             break;
 
         case state::blocked:
             if (!path_blocked(obstacle_distance)) {
                 // The path is no longer blocked
-                Logger::log(INFO, __FILE__, "ControlCenter", "Path no longer blocked");
-                state = state::normal;
+                Logger::log(INFO, __FILE__, "Update state", "Path no longer blocked");
+                set_new_state(speed);
+            }
+            break;
+
+        case state::stopping:
+            if (speed == 0) {
+                Logger::log(INFO, __FILE__, "Update state", "Stopped");
+                state = stop_reason;
+                if (finish_when_stopped) {
+                    finish_instruction();
+                    finish_when_stopped = false;
+                }
             }
             break;
 
         default:
-            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
+            Logger::log(ERROR, __FILE__, "Update state", "Unknown state");
     }
 }
 
-enum state::ControlState ControlCenter::get_new_state() {
+void ControlCenter::set_new_state(int speed) {
     enum instruction::InstructionNumber instr{};
+    enum state::ControlState new_state{};
+    string state_name{};
     if (drive_instructions.empty()) {
         // No instruction
-        return state::stop_line;
+        instr = instruction::stop;
     } else {
         instr = drive_instructions.front().number;
     }
     switch (instr) {
         case instruction::forward:
-            return state::normal;
+            new_state = state::normal;
+            state_name = "normal";
+            break;
         case instruction::left:
         case instruction::right:
-            return state::intersection;
+            new_state = state::intersection;
+            state_name = "intersection";
+            break;
         case instruction::stop:
-            return state::stop_line;
+            if (speed > 0) {
+                stop_reason = state::stop_line;
+                new_state = state::stopping;
+                state_name = "stopping";
+            } else {
+                new_state = state::stop_line;
+            }
+            break;
         default:
-            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
-            return state::stop_line;
+            Logger::log(ERROR, __FILE__, "Set new state", "Unknown instruction");
+            new_state = state::stop_line;
+            state_name = "stop_line";
+            break;
+    }
+    if (new_state != state) {
+        Logger::log(INFO, __FILE__, "Set new state", state_name);
+        state = new_state;
     }
 }
 

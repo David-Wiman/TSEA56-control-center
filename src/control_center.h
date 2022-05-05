@@ -30,14 +30,14 @@ public:
 
     /* The control center is callable. It must be called every program cycle. */
     reference_t operator()(
-            int obstacle_distance, int stop_distance, int left_angle,
-            int right_angle, int image_processing_status_code);
+            int obstacle_distance, int stop_distance, int speed,
+            int left_angle, int right_angle, int image_processing_status_code);
 
     inline reference_t operator()(sensor_data_t sensor_data, image_proc_t image_proc_data) {
         return (*this)(
                 sensor_data.obstacle_distance, image_proc_data.stop_distance,
-                image_proc_data.angle_left, image_proc_data.angle_right,
-                image_proc_data.status_code
+                sensor_data.speed, image_proc_data.angle_left, 
+                image_proc_data.angle_right, image_proc_data.status_code
         );
     }
 
@@ -48,13 +48,15 @@ public:
     enum state::ControlState get_state();
 
 private:
-    void update_state(int obstacle_distance, int stop_distence);
+    void update_state(int obstacle_distance, int stop_distence, int speed);
 
     /* Helpter to calculate new state based on the next instruction. */
-    enum state::ControlState get_new_state();
+    void set_new_state(int speed);
 
-    /* Remove the current instruction from the buffer, and add it's id to the
-     * finished instructin id buffer. */
+    /* The current instruction is completed. Now:
+     * - Remove the current instruction from the buffer
+     * - Add it's id to the finished instruction id buffer
+     * - Inform path_finder */
     void finish_instruction();
 
     inline bool path_blocked(int obstacle_distance) {
@@ -75,7 +77,9 @@ private:
 
     std::list<int> obstacle_distance_buffer{};
     std::list<int> stop_distance_buffer{};
-    enum state::ControlState state;
+    enum state::ControlState state{state::stop_line};
+    enum state::ControlState stop_reason{state::stop_line};
+    bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
     bool have_stoped{false};
