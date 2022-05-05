@@ -36,9 +36,12 @@ reference_t ControlCenter::operator()(
         int obstacle_distance, int stop_distance, int speed,
         int left_angle, int right_angle, int image_processing_status_code) {
     stringstream ss;
-    ss << "obstacle_distance: " << obstacle_distance
-       << ", stop_distance: " << stop_distance;
-    Logger::log(DEBUG, __FILE__, "ControlCenter()", ss.str());
+    ss << "obstacle_distance=" << obstacle_distance
+       << ", stop_distance=" << stop_distance
+       << ", speed=" << speed
+       << ", angles=" << left_angle << "," << right_angle
+       << ", status_code=" << image_processing_status_code;
+    Logger::log(DEBUG, __FILE__, "start", ss.str());
     reference_t reference = {0, 0, regulation_mode::auto_nominal};
 
     if (stop_distance == -1)
@@ -60,10 +63,11 @@ reference_t ControlCenter::operator()(
     reference.speed = calculate_speed();
 
     ss.str("");
-    ss << "angle = " << reference.angle
-       << ", speed = " << reference.speed
-       << ", drive mode = " << reference.regulation_mode;
-    Logger::log(DEBUG, __FILE__, "reference", ss.str());
+    ss << "state=" << state
+       << ", Rangle=" << reference.angle
+       << ", Rspeed=" << reference.speed
+       << ", drive mode=" << reference.regulation_mode;
+    Logger::log(DEBUG, __FILE__, "done", ss.str());
 
     return reference;
 }
