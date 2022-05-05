@@ -15,7 +15,7 @@
 #define OBST_DISTANCE_CLOSE 90
 
 namespace state {
-    enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
+    enum ControlState {normal, intersection, stopping, blocked, stop_line, waiting};
 }
 
 class ControlCenter {

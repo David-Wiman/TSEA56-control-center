@@ -138,30 +138,30 @@ TEST_CASE("Control Center") {
     SECTION("Basics") {
         Logger::init();
         ControlCenter control_center{};
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
         control_center.add_drive_instruction(instruction::left, "1");
         control_center(1000, 200, 0, 0, 0);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
     }
     SECTION("Obstacle detection") {
         Logger::init();
         ControlCenter control_center{};
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
         control_center.add_drive_instruction(instruction::left, "1");
         control_center(OBST_DISTANCE_CLOSE-10, 200, 0, 0, 0);
-        CHECK(control_center.get_state() == state::stoped_at_obstacle);
+        CHECK(control_center.get_state() == state::blocked);
         control_center(OBST_DISTANCE_CLOSE+10, 200, 0, 0, 0);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         vector<int> obstacle_distances{1000, 1000, 100, 75, 60, 55, 30, 25, 15, 10, 2, 1000};
         for (auto distance : obstacle_distances) {
             reference_t ref = control_center(distance, 200, 0, 0, 0);
             if (distance > OBST_DISTANCE_CLOSE) {
                 CHECK(ref.speed == DEFAULT_SPEED);
-                CHECK(control_center.get_state() == state::running);
+                CHECK(control_center.get_state() == state::normal);
             } else {
                 CHECK(ref.speed == 0);
-                CHECK(control_center.get_state() == state::stoped_at_obstacle);
+                CHECK(control_center.get_state() == state::blocked);
             }
         }
     Logger::close();
@@ -169,26 +169,26 @@ TEST_CASE("Control Center") {
     SECTION("Stop-line detection") {
         Logger::init();
         ControlCenter control_center{};
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
         control_center.add_drive_instruction(instruction::forward, "1");
         control_center(STOP_DISTANCE_CLOSE-10, 200, 0, 0, 0);
-        CHECK(control_center.get_state() == state::stoped_at_obstacle);
+        CHECK(control_center.get_state() == state::blocked);
         control_center(OBST_DISTANCE_CLOSE+10, 200, 0, 0, 0);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         int distance{-1};
         reference_t ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
         distance = 100;
         ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         distance = STOP_DISTANCE_CLOSE;
         ref = control_center(1000, distance, 0, 0, 0);
         CHECK(ref.speed == 0);
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
     }
     SECTION("Drive Instructions") {
         Logger::init();
@@ -219,34 +219,34 @@ TEST_CASE("Control Center") {
         ref = control_center(1000, 200, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         // At line, but don't stop. Continue til next line
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "1");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running_in_intersection);
+        CHECK(control_center.get_state() == state::intersection);
 
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 20, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running_in_intersection);
+        CHECK(control_center.get_state() == state::intersection);
 
         ref = control_center(1000, STOP_DISTANCE_FAR + 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running_in_intersection);
+        CHECK(control_center.get_state() == state::intersection);
 
         // At line, stop
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "2");
         CHECK(ref.speed == 0);
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
 
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == 0);
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
 
         // New instruction
         control_center.add_drive_instruction(instruction::left, "3");
@@ -255,18 +255,18 @@ TEST_CASE("Control Center") {
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         ref = control_center(1000, STOP_DISTANCE_FAR + 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == DEFAULT_SPEED);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
 
         // At line, stop
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "3");
         CHECK(ref.speed == 0);
-        CHECK(control_center.get_state() == state::stoped_at_node);
+        CHECK(control_center.get_state() == state::stop_line);
     }
     SECTION("Intersections") {
         Logger::init();
@@ -286,7 +286,7 @@ TEST_CASE("Control Center") {
 
         // Finish straight part, enter intersection
         control_center(200, STOP_DISTANCE_CLOSE, 0, 0, 0);
-        CHECK(control_center.get_state() == state::running_in_intersection);
+        CHECK(control_center.get_state() == state::intersection);
 
         // Left turn
         left_angle = 20;
@@ -317,7 +317,7 @@ TEST_CASE("Control Center") {
         image_processing_status_code = 0;
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
         control_center(200, STOP_DISTANCE_CLOSE, 0, 0, image_processing_status_code);
-        CHECK(control_center.get_state() == state::running_in_intersection);
+        CHECK(control_center.get_state() == state::intersection);
 
         // Intersection
         ref = control_center(200, 200, 0, 0, image_processing_status_code);
@@ -337,7 +337,7 @@ TEST_CASE("Control Center") {
 
         control_center.add_drive_instruction(instruction::forward, "1");
         reference_t ref = control_center(sensor_data, image_data);
-        CHECK(control_center.get_state() == state::running);
+        CHECK(control_center.get_state() == state::normal);
         CHECK(ref.regulation_mode == regulation_mode::auto_nominal);
         CHECK(ref.speed == DEFAULT_SPEED);
         CHECK(ref.angle == 0);

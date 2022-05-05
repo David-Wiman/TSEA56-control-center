@@ -9,7 +9,7 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(): state{state::stoped_at_node} {
+ControlCenter::ControlCenter(): state{state::stop_line} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -50,7 +50,7 @@ reference_t ControlCenter::operator()(
     update_state(obstacle_distance, stop_distance);
 
     // Drive mode
-    if ((state == state::running_in_intersection) || image_processing_status_code != 0) {
+    if ((state == state::intersection) || image_processing_status_code != 0) {
         reference.regulation_mode = regulation_mode::auto_critical;
     } else {
         reference.regulation_mode = regulation_mode::auto_nominal;
@@ -73,24 +73,24 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
 
     if (drive_instructions.empty()) {
         // No instruction
-        state = state::stoped_at_node;
+        state = state::stop_line;
         return;
     } else {
         instruction = drive_instructions.front();
     }
 
     if (instruction.number == instruction::stop) {
-        state = state::stoped_at_node;
+        state = state::stop_line;
         finish_instruction();
         return;
     }
 
     switch (state) {
-        case state::running:
-        case state::running_in_intersection:
+        case state::normal:
+        case state::intersection:
             if (path_blocked(obstacle_distance)) {
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
-                state = state::stoped_at_obstacle;
+                state = state::blocked;
             } else if (at_stop_line(stop_distance)) {
                 // At node
                 Logger::log(INFO, __FILE__, "ControlCenter", "At stop line");
@@ -102,7 +102,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
             }
             break;
 
-        case state::stoped_at_node:
+        case state::stop_line:
             if (!path_blocked(obstacle_distance)) {
                 // The path isn't blocked
                 if (at_stop_line(stop_distance)) {
@@ -110,20 +110,20 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance) {
                 } else {
                     // No new stop line close
                     Logger::log(INFO, __FILE__, "ControlCenter", "Begining next drive instruction");
-                    state = state::running;
+                    state = state::normal;
                 }
             } else {
                 // The path is blocked
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path blocked");
-                state = state::stoped_at_obstacle;
+                state = state::blocked;
             }
             break;
 
-        case state::stoped_at_obstacle:
+        case state::blocked:
             if (!path_blocked(obstacle_distance)) {
                 // The path is no longer blocked
                 Logger::log(INFO, __FILE__, "ControlCenter", "Path no longer blocked");
-                state = state::running;
+                state = state::normal;
             }
             break;
 
@@ -136,21 +136,21 @@ enum state::ControlState ControlCenter::get_new_state() {
     enum instruction::InstructionNumber instr{};
     if (drive_instructions.empty()) {
         // No instruction
-        return state::stoped_at_node;
+        return state::stop_line;
     } else {
         instr = drive_instructions.front().number;
     }
     switch (instr) {
         case instruction::forward:
-            return state::running;
+            return state::normal;
         case instruction::left:
         case instruction::right:
-            return state::running_in_intersection;
+            return state::intersection;
         case instruction::stop:
-            return state::stoped_at_node;
+            return state::stop_line;
         default:
             Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state");
-            return state::stoped_at_node;
+            return state::stop_line;
     }
 }
 
@@ -193,12 +193,12 @@ string ControlCenter::get_current_road_segment() {
 
 int ControlCenter::calculate_speed() {
     switch (state) {
-        case state::running:
-        case state::running_in_intersection:
+        case state::normal:
+        case state::intersection:
             return DEFAULT_SPEED;
 
-        case state::stoped_at_node:
-        case state::stoped_at_obstacle:
+        case state::stop_line:
+        case state::blocked:
             return 0;
 
         default:
