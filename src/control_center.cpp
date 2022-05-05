@@ -91,17 +91,6 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance, int s
         intr = drive_instructions.front();
     }
 
-    //if (intr.number == instruction::stop) {
-        //if (speed > 0) {
-            //state = state::stopping;
-            //stop_reason = state::stop_line;
-        //} else {
-            //state = state::stop_line;
-            //finish_instruction();
-        //}
-        //return;
-    //}
-
     switch (state) {
         case state::normal:
         case state::intersection:
