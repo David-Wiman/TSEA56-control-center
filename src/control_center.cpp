@@ -15,8 +15,18 @@ ControlCenter::ControlCenter(size_t obstacle_distance_filter_len, size_t stop_di
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
-void ControlCenter::set_position(MapNode *map_node) {
+void ControlCenter::set_position(string c_p_n) {
+    current_position_name = c_p_n;
+}
 
+void ControlCenter::update_map(json m) {
+    path_finder.update_map(m);
+}
+
+vector<int> ControlCenter::get_drive_instructions(string stop_node_name){
+    path_finder.solve(current_position_name, stop_node_name);
+    vector<int> drive_instructions = path_finder.get_drive_mission();
+    return drive_instructions;
 }
 
 void ControlCenter::set_drive_mission(std::list<MapNode*> drive_mission) {
