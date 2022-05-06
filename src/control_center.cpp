@@ -9,7 +9,9 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter() {
+ControlCenter::ControlCenter(size_t obstacle_distance_filter_len, size_t stop_distance_filter_len)
+: obstacle_distance_filter{obstacle_distance_filter_len, 100},
+  stop_distance_filter{stop_distance_filter_len, 0} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -49,6 +51,13 @@ reference_t ControlCenter::operator()(
 
     if (obstacle_distance == 0)
         obstacle_distance = 1000;
+
+    obstacle_distance = obstacle_distance_filter(obstacle_distance);
+    stop_distance = stop_distance_filter(stop_distance);
+    ss.str("");
+    ss << "obstacle_distance=" << obstacle_distance
+       << " stop_distance=" << stop_distance;
+    Logger::log(DEBUG, __FILE__, "Filtered values", ss.str());
 
     update_state(obstacle_distance, stop_distance, speed);
 

@@ -5,6 +5,7 @@
 #include "path_finder.h"
 #include "drive_mission_generator.h"
 #include "raspi_common.h"
+#include "filter.h"
 
 #include <string>
 #include <list>
@@ -20,7 +21,7 @@ namespace state {
 
 class ControlCenter {
 public:
-    ControlCenter();
+    ControlCenter(size_t obstacle_distance_filter_len=1, size_t stop_distance_filter_len=1);
     //void set_new_map(MapGraph *mapgraph);
     void set_position(MapNode *mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
@@ -75,8 +76,8 @@ private:
     /* Call after update_state(). */
     int calculate_angle(int left_angle, int right_angle);
 
-    std::list<int> obstacle_distance_buffer{};
-    std::list<int> stop_distance_buffer{};
+    Filter<int> obstacle_distance_filter;
+    Filter<int> stop_distance_filter;
     enum state::ControlState state{state::stop_line};
     enum state::ControlState stop_reason{state::stop_line};
     bool finish_when_stopped{false};

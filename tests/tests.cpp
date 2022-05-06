@@ -5,6 +5,7 @@
 #include "control_center.h"
 #include "log.h"
 #include "raspi_common.h"
+#include "filter.h"
 
 #include <string>
 #include <list>
@@ -131,6 +132,19 @@ TEST_CASE("Path Finder") {
         drive_mission = finder.get_drive_mission();
         finder.solve("G1", "J2");
         drive_mission = finder.get_drive_mission();
+    }
+}
+
+TEST_CASE("Filter") {
+    SECTION("Basics") {
+        Filter<double> f1{3, 0};
+        CHECK( (f1(1.0) - 0.3333) < 0.001 );
+        f1(1.0);
+        CHECK( (f1(1.0) - 3.0) < 0.001 );
+
+        Filter<int> f2{1, 0};
+        CHECK( f2(4) == 4 );
+        CHECK( f2(5) == 5 );
     }
 }
 
@@ -407,5 +421,54 @@ TEST_CASE("Control Center") {
         sensor_data.speed = 0;
         ref = control_center(sensor_data, image_data);
         CHECK(ref.speed == 0);
+    }
+
+    SECTION("Filter") {
+        Logger::init();
+        ControlCenter control_center{3, 3};
+
+        sensor_data_t sensor_data{};
+        sensor_data.obstacle_distance = 0;
+        sensor_data.speed = 0;
+
+        image_proc_t image_data{};
+        image_data.stop_distance = STOP_DISTANCE_CLOSE;
+        image_data.angle_left = 0;
+        image_data.angle_right = 0;
+        image_data.status_code = 0;
+
+        control_center.add_drive_instruction(instruction::forward, "1");
+
+        // Start at stop line, ignore it
+        reference_t ref = control_center(sensor_data, image_data);
+        CHECK(control_center.get_state() == state::normal);
+        CHECK(ref.speed == DEFAULT_SPEED);
+        sensor_data.speed = DEFAULT_SPEED;
+
+        // Pass the line
+        image_data.stop_distance = STOP_DISTANCE_FAR;
+        ref = control_center(sensor_data, image_data);
+        ref = control_center(sensor_data, image_data);
+        ref = control_center(sensor_data, image_data);
+
+        // Don't stop, because we've only seen this once
+        sensor_data.obstacle_distance = OBST_DISTANCE_CLOSE - 10;
+        ref = control_center(sensor_data, image_data);
+        CHECK(control_center.get_state() == state::normal);
+        CHECK(ref.speed == DEFAULT_SPEED);
+        sensor_data.speed = DEFAULT_SPEED;
+
+        ref = control_center(sensor_data, image_data);
+        ref = control_center(sensor_data, image_data);
+
+        // Now we should be stopping
+        CHECK(control_center.get_state() == state::stopping);
+        CHECK(ref.speed == 0);
+
+        // Finaly stop
+        sensor_data.speed = 0;
+        ref = control_center(sensor_data, image_data);
+        CHECK(ref.speed == 0);
+
     }
 }
