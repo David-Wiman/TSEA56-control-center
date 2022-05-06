@@ -215,6 +215,12 @@ TEST_CASE("Control Center") {
         control_center.add_drive_instruction(instruction::forward, "1");
         control_center.add_drive_instruction(instruction::right, "2");
 
+        // Start at line, ignore it
+        ref = control_center(1000, 10, DEFAULT_SPEED, 0, 0, 0);
+        CHECK(control_center.get_finished_instruction_id() == "");
+        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(control_center.get_state() == state::normal);
+
         // Drive to next line
         ref = control_center(1000, 200, DEFAULT_SPEED, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");

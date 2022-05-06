@@ -82,7 +82,7 @@ private:
     bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
-    bool have_stoped{false};
+    bool have_stoped{true};
 
     PathFinder path_finder{};
 };
