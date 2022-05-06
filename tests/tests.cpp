@@ -95,13 +95,10 @@ TEST_CASE("Path Finder") {
         vector<int> drive_mission = finder.get_drive_mission();
 
         CHECK(finder.get_current_drive_instruction() == 2);
-        CHECK(finder.get_current_road_segment() == "AC");
         finder.done_with_drive_instruction();
         CHECK(finder.get_current_drive_instruction() == 0);
-        CHECK(finder.get_current_road_segment() == "CB");
         finder.done_with_drive_instruction();
         CHECK(finder.get_current_drive_instruction() == 1);
-        CHECK(finder.get_current_road_segment() == "BD");
         finder.done_with_drive_instruction();
         Logger::close();
     }
@@ -472,15 +469,25 @@ TEST_CASE("Control Center") {
 
     }
     SECTION("Dijkstra from ControlCenter") {
+        // Make map
         string map_string = "{\"MapData\":{\"A1\":[{\"K1\":5}],\"A2\":[{\"B2\":1}],\"B1\":[{\"A1\":1}],\"B2\":[{\"L2\":2},{\"C2\":2}],\"C1\":[{\"B1\":2},{\"L2\":2}],\"C2\":[{\"D2\":1}],\"D1\":[{\"C1\":1}],\"D2\":[{\"E2\":1}],\"E1\":[{\"D1\":1}],\"E2\":[{\"F2\":2}],\"F1\":[{\"E1\":2}],\"F2\":[{\"G2\":3}],\"G1\":[{\"F1\":3}],\"G2\":[{\"H2\":1}],\"H1\":[{\"G1\":1}],\"H2\":[{\"M1\":2},{\"I2\":2}],\"I1\":[{\"H1\":2},{\"M1\":2}],\"I2\":[{\"J2\":1}],\"J1\":[{\"I1\":1}],\"J2\":[{\"K2\":1}],\"K1\":[{\"J1\":1}],\"K2\":[{\"A2\":5}],\"L1\":[{\"C2\":2},{\"B1\":2}],\"L2\":[{\"M2\":1}],\"M1\":[{\"L1\":1}],\"M2\":[{\"I2\":2},{\"H1\":2}]}}";
         json json_map = json::parse(map_string); 
+        // Make control_center
         ControlCenter control_center{};
+        // Prep for solve
         control_center.update_map(json_map);
         control_center.set_position("B1");
+        // Solve
         vector<int> drive_instructions = control_center.get_drive_instructions("H2");
-        CHECK(drive_instructions[0] == 1);
-        control_center.set_position("H2");
+        // Tests
+        CHECK(control_center.get_current_drive_instruction() == 1);
+        CHECK(control_center.get_current_road_segment() == "B1A1");
+        // Reached destination
+        control_center.finish_drive_mission();
+        // New solve
         drive_instructions = control_center.get_drive_instructions("L1");
-        CHECK(drive_instructions[0] == 0);
+        // Tests
+        CHECK(control_center.get_current_drive_instruction() == 0);
+        CHECK(control_center.get_current_road_segment() == "H2M1");
     }
 }

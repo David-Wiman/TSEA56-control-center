@@ -27,6 +27,7 @@ public:
     void set_position(std::string current_position_name);
     void update_map(json m);
     std::vector<int> get_drive_instructions(std::string stop_node_name);
+    void finish_drive_mission();
 
     void set_drive_mission(std::list<MapNode*> drive_mission);
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
@@ -46,6 +47,7 @@ public:
     }
 
     std::string get_current_road_segment();
+    int get_current_drive_instruction();
 
     /* Return 0 if no new instruction have been finished. */
     std::string get_finished_instruction_id();
@@ -90,6 +92,7 @@ private:
 
     PathFinder path_finder{};
     std::string current_position_name{};
+    std::string current_target_name{};
 };
 
 #endif // CONTROLCENTER_H
