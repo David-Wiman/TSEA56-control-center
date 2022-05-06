@@ -207,6 +207,9 @@ void PathFinder::make_MapNode_list(json json_map) {
             }
         }
     }
+    vector<MapNode*> n_v(nodes.size());
+    copy(nodes.begin(), nodes.end(), n_v.begin());
+    nodes_vector = n_v;
 }
 
 /* Find current drive instruction */
@@ -224,9 +227,6 @@ int PathFinder::get_current_drive_instruction() {
 }
 /* Returns string with edge identification e.g. "A1K1" meaning from A1 to K1 */
 string PathFinder::get_current_road_segment() {
-    // Copy nodes in to nodes_vector
-    vector<MapNode*> nodes_vector(nodes.size());
-    std::copy(nodes.begin(), nodes.end(), nodes_vector.begin());
     // Names of node just passed and node we're heading towards
     string from = nodes_vector[nodes_passed]->get_name();
     string to = nodes_vector[nodes_passed+1]->get_name();
@@ -240,6 +240,7 @@ void PathFinder::find_path(MapNode *neighbour, string stop_node_name) {
     while (new_nodes_vector.front()->get_parent_node() != nullptr) {
         new_nodes_vector.insert(new_nodes_vector.begin(), new_nodes_vector.front()->get_parent_node());
     }
+    nodes_vector = new_nodes_vector;
 
     // Generate drive instructions based on node vector
     DriveMissionGenerator drive_mission_generator{new_nodes_vector, stop_node_name};
