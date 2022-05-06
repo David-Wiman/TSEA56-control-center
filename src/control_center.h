@@ -22,9 +22,11 @@ class ControlCenter {
 public:
     ControlCenter();
     //void set_new_map(MapGraph *mapgraph);
-    void set_position(MapNode *mapnode);
-    void set_drive_mission(std::list<MapNode*> drive_mission);
+    void set_position(std::string current_position_name);
+    void update_map(json m);
+    std::vector<int> get_drive_instructions(std::string stop_node_name);
 
+    void set_drive_mission(std::list<MapNode*> drive_mission);
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
     void add_drive_instruction(drive_instruction_t drive_instruction);
 
@@ -82,6 +84,7 @@ private:
     bool have_stoped{false};
 
     PathFinder path_finder{};
+    std::string current_position_name{};
 };
 
 #endif // CONTROLCENTER_H
