@@ -242,23 +242,23 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == state::normal);
 
         // At line, but don't stop. Continue til next line
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, DEFAULT_SPEED, 0, 0, 0);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, INTERSECTION_SPEED, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "1");
-        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(ref.speed == INTERSECTION_SPEED);
         CHECK(control_center.get_state() == state::intersection);
 
         ref = control_center(1000, STOP_DISTANCE_CLOSE - 20, DEFAULT_SPEED, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
-        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(ref.speed == INTERSECTION_SPEED);
         CHECK(control_center.get_state() == state::intersection);
 
-        ref = control_center(1000, STOP_DISTANCE_FAR + 10, DEFAULT_SPEED, 0, 0, 0);
+        ref = control_center(1000, STOP_DISTANCE_FAR + 10, INTERSECTION_SPEED, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
-        CHECK(ref.speed == DEFAULT_SPEED);
+        CHECK(ref.speed == INTERSECTION_SPEED);
         CHECK(control_center.get_state() == state::intersection);
 
         // At line, stop
-        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, DEFAULT_SPEED, 0, 0, 0);
+        ref = control_center(1000, STOP_DISTANCE_CLOSE - 10, INTERSECTION_SPEED, 0, 0, 0);
         CHECK(control_center.get_finished_instruction_id() == "");
         CHECK(ref.speed == 0);
         CHECK(control_center.get_state() == state::stopping);

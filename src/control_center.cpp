@@ -236,8 +236,10 @@ string ControlCenter::get_current_road_segment() {
 int ControlCenter::calculate_speed() {
     switch (state) {
         case state::normal:
-        case state::intersection:
             return DEFAULT_SPEED;
+
+        case state::intersection:
+            return INTERSECTION_SPEED;
 
         case state::stop_line:
         case state::stopping:
