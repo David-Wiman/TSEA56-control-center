@@ -9,10 +9,14 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(size_t obstacle_distance_filter_len, size_t stop_distance_filter_len, int consecutive_param)
+ControlCenter::ControlCenter(size_t obstacle_distance_filter_len,
+                             size_t stop_distance_filter_len,
+                             int consecutive_param,
+                             int high_count_param)
 : obstacle_distance_filter{obstacle_distance_filter_len, 100},
-  stop_distance_filter{stop_distance_filter_len, 0}, 
-  consecutive_param{consecutive_param} {
+  stop_distance_filter{stop_distance_filter_len, 0},
+  consecutive_param{consecutive_param},
+  high_count_param{high_count_param} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -208,11 +212,18 @@ bool ControlCenter::at_stop_line(int stop_distance) {
     } else {
         consecutive_decreasing_stop_distances = 0;
     }
+    last_stop_distance = stop_distance;
 
     if (stop_distance >= STOP_DISTANCE_FAR) {
         // Next stop line is very far away
-        stop_line_mode = stop_line::far;
+        ++far_stop_counter;
+        if (far_stop_counter > high_count_param) {
+            stop_line_mode = stop_line::far;
+            far_stop_counter = 0;
+        }
         return false;
+    } else {
+        far_stop_counter = 0;
     }
 
     switch (stop_line_mode) {
@@ -224,8 +235,7 @@ bool ControlCenter::at_stop_line(int stop_distance) {
             }
             return false;
         case stop_line::mid:
-            if ((stop_distance <= STOP_DISTANCE_CLOSE)
-                && consecutive_decreasing_stop_distances >= consecutive_param) {
+            if (stop_distance <= STOP_DISTANCE_CLOSE) {
                 stop_line_mode = stop_line::close;
                 return true;
             }

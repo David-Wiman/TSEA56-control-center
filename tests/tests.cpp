@@ -487,7 +487,7 @@ TEST_CASE("Control Center") {
     SECTION("Advanced filter") {
         Logger::init();
 
-        ControlCenter control_center{1, 1, 5};
+        ControlCenter control_center{1, 1, 5, 2};
         reference_t ref{};
         int completed_instructions{0};
 
@@ -527,16 +527,18 @@ TEST_CASE("Control Center") {
         }
         CHECK(completed_instructions == 1);
 
-        // Bad data between lines
         completed_instructions = 0;
         vector<int> stop_distances2{
             20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, -1, -1, -1, -1, -1, -1,
+            // Bad data between lines
             10, -1, 13, 12, 11, 10, -1, -1, 13, -1, -1, -1, -1, -1, 10, 12, 22,
             -1, -1, 99, 45, 11, -1, -1, -1, 13, -1, -1, -1, -1, -1, 10, 13, 11,
             10, -1, 13, 12, 11, 10, 10, 10, 10, 10, -1, -1, -1, -1, 10, 12, 22,
-            50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34,
-            33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20
+            // Bad data when detecting lines
+            50, 49, -1, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34,
+            33, 32, -1, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20
         };
+
         for (int stop_distance : stop_distances2) {
             image_data.stop_distance = stop_distance;
             ref = control_center(sensor_data, image_data);
