@@ -203,7 +203,7 @@ void ControlCenter::set_new_state(int speed) {
 }
 
 bool ControlCenter::at_stop_line(int stop_distance) {
-    if (stop_distance <= last_stop_distance) {
+    if (stop_distance <= last_stop_distance + 5) {
         ++consecutive_decreasing_stop_distances;
     } else {
         consecutive_decreasing_stop_distances = 0;

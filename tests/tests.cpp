@@ -371,7 +371,7 @@ TEST_CASE("Control Center") {
         ControlCenter control_center{};
 
         sensor_data_t sensor_data{};
-        sensor_data.obstacle_distance = STOP_DISTANCE_FAR;
+        sensor_data.obstacle_distance = OBST_DISTANCE_CLOSE + 10;
         sensor_data.speed = 0;
 
         image_proc_t image_data{};
@@ -404,7 +404,7 @@ TEST_CASE("Control Center") {
         ControlCenter control_center{};
 
         sensor_data_t sensor_data{};
-        sensor_data.obstacle_distance = STOP_DISTANCE_FAR;
+        sensor_data.obstacle_distance = OBST_DISTANCE_CLOSE + 10;
         sensor_data.speed = 0;
 
         image_proc_t image_data{};
@@ -485,6 +485,7 @@ TEST_CASE("Control Center") {
 
     }
     SECTION("Advanced filter") {
+        Logger::init();
 
         ControlCenter control_center{1, 1, 5};
         reference_t ref{};
@@ -543,5 +544,17 @@ TEST_CASE("Control Center") {
                 completed_instructions++;
         }
         CHECK(completed_instructions == 1);
+
+        // Real drive data
+        vector<int> stop_distances3{86, 86, 86, 86, 87, 86, 88, 87, 86, 86, 86, 86, 86, 86, 85, 86, 86, 86, 86, 86, 87, 86, 86, 86, 87, 86, 86, 87, 85, 86, 86, 86, 87, 88, 87, 85, 86, 85, 86, 85, 86, 86, 86, 86, 86, 86, 87, 85, 86, 86, 88, 86, 87, 85, 87, 86, 86, 86, 86, 85, 86, 86, 85, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 87, 85, 85, 84, 83, 83, 81, 81, 80, 77, 76, 75, 73, 73, 70, 68, 67, 65, 62, 60, 57, 55, 52, 49, 47, 44, 42, 39, 36, 34, 31, 29, 26, 24, 21, 19, 16, 14, 12, 10, 9, -1, -1, -1, -1, -1, -1, -1};
+        completed_instructions = 0;
+        for (int stop_distance : stop_distances3) {
+            image_data.stop_distance = stop_distance;
+            ref = control_center(sensor_data, image_data);
+            if (control_center.get_finished_instruction_id() == "1")
+                completed_instructions++;
+        }
+        CHECK(completed_instructions == 1);
     }
 }
+
