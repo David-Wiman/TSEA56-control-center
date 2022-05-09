@@ -9,9 +9,10 @@
 
 using namespace std;
 
-ControlCenter::ControlCenter(size_t obstacle_distance_filter_len, size_t stop_distance_filter_len)
+ControlCenter::ControlCenter(size_t obstacle_distance_filter_len, size_t stop_distance_filter_len, int consecutive_param)
 : obstacle_distance_filter{obstacle_distance_filter_len, 100},
-  stop_distance_filter{stop_distance_filter_len, 0} {
+  stop_distance_filter{stop_distance_filter_len, 0}, 
+  consecutive_param{consecutive_param} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -202,23 +203,37 @@ void ControlCenter::set_new_state(int speed) {
 }
 
 bool ControlCenter::at_stop_line(int stop_distance) {
+    if (stop_distance <= last_stop_distance) {
+        ++consecutive_decreasing_stop_distances;
+    } else {
+        consecutive_decreasing_stop_distances = 0;
+    }
+
     if (stop_distance >= STOP_DISTANCE_FAR) {
         // Next stop line is very far away
-        have_stoped = false;
+        stop_line_mode = stop_line::far;
         return false;
     }
-    if (stop_distance <= STOP_DISTANCE_CLOSE) {
-        if (have_stoped) {
+
+    switch (stop_line_mode) {
+        case stop_line::far:
+            if ((stop_distance <= STOP_DISTANCE_MID)
+                && (stop_distance > STOP_DISTANCE_CLOSE)
+                && consecutive_decreasing_stop_distances >= consecutive_param) {
+                stop_line_mode = stop_line::mid;
+            }
             return false;
-        } else {
-            // We have not stoped at this line. Stop!
-            have_stoped = true;
-            return true;
-        }
-    } else {
-        // Stop distance is not close enough to stop
-        return false;
+        case stop_line::mid:
+            if ((stop_distance <= STOP_DISTANCE_CLOSE)
+                && consecutive_decreasing_stop_distances >= consecutive_param) {
+                stop_line_mode = stop_line::close;
+                return true;
+            }
+            return false;
+        case stop_line::close:
+            return false;
     }
+    return false;
 }
 
 void ControlCenter::finish_instruction() {

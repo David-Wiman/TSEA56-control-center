@@ -13,6 +13,7 @@
 #define DEFAULT_SPEED 500
 #define INTERSECTION_SPEED 400
 #define STOP_DISTANCE_CLOSE 40
+#define STOP_DISTANCE_MID 50
 #define STOP_DISTANCE_FAR 100
 #define OBST_DISTANCE_CLOSE 90
 
@@ -20,9 +21,16 @@ namespace state {
     enum ControlState {normal, intersection, stopping, blocked, stop_line, waiting};
 }
 
+namespace stop_line {
+    enum StopLine {close, mid, far};
+}
+
 class ControlCenter {
 public:
-    ControlCenter(size_t obstacle_distance_filter_len=1, size_t stop_distance_filter_len=1);
+    ControlCenter(
+            size_t obstacle_distance_filter_len=1,
+            size_t stop_distance_filter_len=1,
+            int consecutive_param=1);
     //void set_new_map(MapGraph *mapgraph);
     void set_position(MapNode *mapnode);
     void set_drive_mission(std::list<MapNode*> drive_mission);
@@ -38,7 +46,7 @@ public:
     inline reference_t operator()(sensor_data_t sensor_data, image_proc_t image_proc_data) {
         return (*this)(
                 sensor_data.obstacle_distance, image_proc_data.stop_distance,
-                sensor_data.speed, image_proc_data.angle_left, 
+                sensor_data.speed, image_proc_data.angle_left,
                 image_proc_data.angle_right, image_proc_data.status_code
         );
     }
@@ -84,7 +92,11 @@ private:
     bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
-    bool have_stoped{true};
+    //bool have_stoped{true};
+    int last_stop_distance{100};
+    int consecutive_decreasing_stop_distances{0};
+    enum stop_line::StopLine stop_line_mode{stop_line::close};
+    int consecutive_param;
 
     PathFinder path_finder{};
 };
