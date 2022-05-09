@@ -23,9 +23,17 @@ void ControlCenter::update_map(json m) {
     path_finder.update_map(m);
 }
 
-vector<int> ControlCenter::get_drive_instructions(string stop_node_name){
+vector<int> ControlCenter::get_drive_instructions(string stop_node_name) {
     current_target_name = stop_node_name;
     path_finder.solve(current_position_name, stop_node_name);
+    vector<int> drive_instructions = path_finder.get_drive_mission();
+    return drive_instructions;
+}
+
+vector<int> ControlCenter::get_drive_instructions_to_next_target_node() {
+    current_target_name = target_node_name_list.front();
+    target_node_name_list.pop_front();
+    path_finder.solve(current_position_name, current_target_name);
     vector<int> drive_instructions = path_finder.get_drive_mission();
     return drive_instructions;
 }
@@ -256,6 +264,13 @@ string ControlCenter::get_current_road_segment() {
 
 int ControlCenter::get_current_drive_instruction() {
     return path_finder.get_current_drive_instruction();
+}
+
+void ControlCenter::update_list_of_target_nodes(list<string> t_n_m_l) {
+    string name_of_current_position = t_n_m_l.front();
+    set_position(name_of_current_position);
+    t_n_m_l.pop_front();
+    target_node_name_list = t_n_m_l;
 }
 
 int ControlCenter::calculate_speed() {
