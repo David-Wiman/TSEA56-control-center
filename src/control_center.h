@@ -9,6 +9,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 #define DEFAULT_SPEED 500
 #define INTERSECTION_SPEED 400
@@ -37,6 +38,8 @@ public:
     void update_map(json m);
     std::vector<int> get_drive_instructions(std::string stop_node_name);
     void finish_drive_mission();
+    void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
+    std::vector<int> get_drive_instructions_to_next_target_node();
 
     void set_drive_mission(std::list<MapNode*> drive_mission);
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
@@ -108,6 +111,7 @@ private:
     PathFinder path_finder{};
     std::string current_position_name{};
     std::string current_target_name{};
+    std::list<std::string> target_node_name_list{};
 };
 
 #endif // CONTROLCENTER_H
