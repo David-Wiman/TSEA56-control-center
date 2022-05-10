@@ -214,6 +214,8 @@ bool ControlCenter::at_stop_line(int stop_distance) {
     }
     last_stop_distance = stop_distance;
 
+    bool retval{false};
+
     if (stop_distance >= STOP_DISTANCE_FAR) {
         // Next stop line is very far away
         ++far_stop_counter;
@@ -221,7 +223,6 @@ bool ControlCenter::at_stop_line(int stop_distance) {
             stop_line_mode = stop_line::far;
             far_stop_counter = 0;
         }
-        return false;
     } else {
         far_stop_counter = 0;
     }
@@ -233,17 +234,31 @@ bool ControlCenter::at_stop_line(int stop_distance) {
                 && consecutive_decreasing_stop_distances >= consecutive_param) {
                 stop_line_mode = stop_line::mid;
             }
-            return false;
+            retval = false;
+            break;
         case stop_line::mid:
             if (stop_distance <= STOP_DISTANCE_CLOSE) {
                 stop_line_mode = stop_line::close;
-                return true;
+                retval = true;
+                break;
             }
-            return false;
+            retval = false;
+            break;
         case stop_line::close:
-            return false;
+            retval = false;
+            break;
     }
-    return false;
+
+    // Log
+    array<string, 3> mode_names{"close", "mid", "far"};
+    stringstream ss{};
+    ss << "stop_distance=" << stop_distance
+       << ", consec=" << consecutive_decreasing_stop_distances
+       << ", far_count=" << far_stop_counter
+       << ", mode=" << mode_names[stop_line_mode];
+    Logger::log(DEBUG, __FILE__, "at_stop_line", ss.str());
+
+    return retval;
 }
 
 void ControlCenter::finish_instruction() {
