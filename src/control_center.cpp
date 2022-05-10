@@ -317,6 +317,14 @@ void ControlCenter::update_list_of_target_nodes(list<string> t_n_m_l) {
     target_node_name_list = t_n_m_l;
 }
 
+void ControlCenter::update_list_of_target_nodes_with_DriveMission(DriveMission dm) {
+    list<string> all_nodes_list = dm.get_target_nodes()
+    string name_of_current_position = all_nodes_list.front()
+    set_position(name_of_current_position);
+    all_nodes_list.pop_front();
+    target_node_name_list = all_nodes_list;
+}
+
 int ControlCenter::calculate_speed() {
     switch (state) {
         case state::normal:

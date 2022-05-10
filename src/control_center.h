@@ -38,8 +38,8 @@ public:
     void update_map(json m);
     std::vector<int> get_drive_instructions(std::string stop_node_name);
     void finish_drive_mission();
-    std::string get_position();
     void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
+    void update_list_of_target_nodes_with_DriveMission(DriveMission dm);
     std::vector<int> get_drive_instructions_to_next_target_node();
 
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
