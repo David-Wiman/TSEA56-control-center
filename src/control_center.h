@@ -5,22 +5,33 @@
 #include "path_finder.h"
 #include "drive_mission_generator.h"
 #include "raspi_common.h"
+#include "filter.h"
 
 #include <string>
 #include <list>
 
 #define DEFAULT_SPEED 500
-#define STOP_DISTANCE_CLOSE 40
-#define STOP_DISTANCE_FAR 100
+#define INTERSECTION_SPEED 400
+#define STOP_DISTANCE_CLOSE 30
+#define STOP_DISTANCE_MID 50
+#define STOP_DISTANCE_FAR 70
 #define OBST_DISTANCE_CLOSE 90
 
 namespace state {
-    enum ControlState {running, running_in_intersection, stoped_at_node, stoped_at_obstacle};
+    enum ControlState {normal, intersection, stopping, blocked, stop_line, waiting};
+}
+
+namespace stop_line {
+    enum StopLine {close, mid, far};
 }
 
 class ControlCenter {
 public:
-    ControlCenter();
+    ControlCenter(
+            size_t obstacle_distance_filter_len=1,
+            size_t stop_distance_filter_len=1,
+            int consecutive_param=1,
+            int high_count_param=0);
     //void set_new_map(MapGraph *mapgraph);
     void set_position(std::string current_position_name);
     void update_map(json m);
@@ -33,18 +44,17 @@ public:
 
     /* The control center is callable. It must be called every program cycle. */
     reference_t operator()(
-            int obstacle_distance, int stop_distance, int left_angle,
-            int right_angle, int image_processing_status_code);
+            int obstacle_distance, int stop_distance, int speed,
+            int left_angle, int right_angle, int image_processing_status_code);
 
     inline reference_t operator()(sensor_data_t sensor_data, image_proc_t image_proc_data) {
         return (*this)(
                 sensor_data.obstacle_distance, image_proc_data.stop_distance,
-                image_proc_data.angle_left, image_proc_data.angle_right,
-                image_proc_data.status_code
+                sensor_data.speed, image_proc_data.angle_left,
+                image_proc_data.angle_right, image_proc_data.status_code
         );
     }
 
-    std::string get_position();
     std::string get_current_road_segment();
     int get_current_drive_instruction();
 
@@ -53,13 +63,15 @@ public:
     enum state::ControlState get_state();
 
 private:
-    void update_state(int obstacle_distance, int stop_distence);
+    void update_state(int obstacle_distance, int stop_distence, int speed);
 
     /* Helpter to calculate new state based on the next instruction. */
-    enum state::ControlState get_new_state();
+    void set_new_state(int speed);
 
-    /* Remove the current instruction from the buffer, and add it's id to the
-     * finished instructin id buffer. */
+    /* The current instruction is completed. Now:
+     * - Remove the current instruction from the buffer
+     * - Add it's id to the finished instruction id buffer
+     * - Inform path_finder */
     void finish_instruction();
 
     inline bool path_blocked(int obstacle_distance) {
@@ -78,12 +90,20 @@ private:
     /* Call after update_state(). */
     int calculate_angle(int left_angle, int right_angle);
 
-    std::list<int> obstacle_distance_buffer{};
-    std::list<int> stop_distance_buffer{};
-    enum state::ControlState state;
+    Filter<int> obstacle_distance_filter;
+    Filter<int> stop_distance_filter;
+    enum state::ControlState state{state::stop_line};
+    enum state::ControlState stop_reason{state::stop_line};
+    bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
-    bool have_stoped{false};
+    //bool have_stoped{true};
+    int last_stop_distance{100};
+    int far_stop_counter{0};
+    int consecutive_decreasing_stop_distances{0};
+    enum stop_line::StopLine stop_line_mode{stop_line::close};
+    int consecutive_param;
+    int high_count_param;
 
     PathFinder path_finder{};
     std::string current_position_name{};
