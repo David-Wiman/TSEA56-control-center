@@ -499,17 +499,17 @@ TEST_CASE("Control Center") {
         // Prep for solve
         control_center.update_map(json_map);
         control_center.update_list_of_target_nodes({"A1", "K2", "H1"});
-        // Solve
+        // Solve A1 to K2
         vector<int> drive_instructions = control_center.get_drive_instructions_to_next_target_node();
         // Tests
         CHECK(control_center.get_current_drive_instruction() == 1);
         CHECK(control_center.get_current_road_segment() == "A1K1");
         // Reached destination
         control_center.finish_drive_mission();
-        // New solve
+        // New solve, K2 to H1
         drive_instructions = control_center.get_drive_instructions_to_next_target_node();
         // Tests
         CHECK(control_center.get_current_drive_instruction() == 1);
-        CHECK(control_center.get_current_road_segment() == "K2A2");
+        CHECK(control_center.get_current_road_segment_as_json() == "{\"Position\":\"K2A2\"}");
     }
 }

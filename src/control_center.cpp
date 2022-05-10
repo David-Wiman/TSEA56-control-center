@@ -38,10 +38,6 @@ vector<int> ControlCenter::get_drive_instructions_to_next_target_node() {
     return drive_instructions;
 }
 
-void ControlCenter::set_drive_mission(std::list<MapNode*> drive_mission) {
-
-}
-
 void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction) {
     drive_instructions.push_back(drive_instruction);
 }
@@ -260,6 +256,13 @@ std::string ControlCenter::get_position() {
 
 string ControlCenter::get_current_road_segment() {
     return path_finder.get_current_road_segment();
+}
+
+string ControlCenter::get_current_road_segment_as_json() {
+    string initial_string = "{\"Position\":\"";
+    string intermediate_string =  path_finder.get_current_road_segment();
+    string final_string = "\"}";
+    return initial_string + intermediate_string + final_string;
 }
 
 int ControlCenter::get_current_drive_instruction() {

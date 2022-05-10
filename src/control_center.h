@@ -29,10 +29,10 @@ public:
     void update_map(json m);
     std::vector<int> get_drive_instructions(std::string stop_node_name);
     void finish_drive_mission();
+    std::string get_position();
     void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
     std::vector<int> get_drive_instructions_to_next_target_node();
 
-    void set_drive_mission(std::list<MapNode*> drive_mission);
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
     void add_drive_instruction(drive_instruction_t drive_instruction);
 
@@ -50,6 +50,7 @@ public:
     }
 
     std::string get_current_road_segment();
+    std::string get_current_road_segment_as_json();
     int get_current_drive_instruction();
 
     /* Return 0 if no new instruction have been finished. */
