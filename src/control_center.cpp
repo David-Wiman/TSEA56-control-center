@@ -258,6 +258,10 @@ bool ControlCenter::at_stop_line(int stop_distance) {
             break;
         case stop_line::close:
             retval = false;
+            if ((stop_distance > STOP_DISTANCE_CLOSE) &&
+                (consecutive_decreasing_stop_distances >= consecutive_param)) {
+                stop_line_mode = stop_line::mid;
+            }
             break;
     }
 
