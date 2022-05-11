@@ -274,6 +274,7 @@ void ControlCenter::update_list_of_target_nodes(list<string> t_n_m_l) {
     set_position(name_of_current_position);
     t_n_m_l.pop_front();
     target_node_name_list = t_n_m_l;
+    Logger::log(INFO, __FILE__, "update_list_of_target_nodes", "");
 }
 
 int ControlCenter::calculate_speed() {
