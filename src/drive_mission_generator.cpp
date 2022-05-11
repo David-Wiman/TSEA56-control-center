@@ -132,6 +132,6 @@ DriveMissionGenerator::DriveMissionGenerator(vector<MapNode*> nodes_vector, stri
     }
 }
 
-vector<int> DriveMissionGenerator::get_drive_mission() {
+vector<instruction::InstructionNumber> DriveMissionGenerator::get_drive_mission() {
     return drive_mission;
 }

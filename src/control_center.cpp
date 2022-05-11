@@ -20,19 +20,12 @@ ControlCenter::ControlCenter(size_t obstacle_distance_filter_len,
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
-void ControlCenter::set_position(string c_p_n) {
-    current_position_name = c_p_n;
+void ControlCenter::set_position(string position) {
+    current_position = position;
 }
 
 void ControlCenter::update_map(json m) {
     path_finder.update_map(m);
-}
-
-vector<int> ControlCenter::get_drive_instructions(string stop_node_name) {
-    current_target_name = stop_node_name;
-    path_finder.solve(current_position_name, stop_node_name);
-    vector<int> drive_instructions = path_finder.get_drive_mission();
-    return drive_instructions;
 }
 
 void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction) {
@@ -141,6 +134,9 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance, int s
                 state = state::blocked;
                 Logger::log(INFO, __FILE__, "Update state", "Path blocked");
                 break;
+            }
+            if (drive_instructions.front().number == instruction::stop) {
+                finish_instruction();
             }
             if (at_stop_line(stop_distance)) {
                 Logger::log(ERROR, __FILE__, "Update state", "Still at stop line");
@@ -277,7 +273,8 @@ void ControlCenter::finish_instruction() {
     Logger::log(INFO, __FILE__, "ControlCenter", "Finishing instruction");
     string id = drive_instructions.front().id;
     drive_instructions.pop_front();
-    road_segments.pop_front();
+    if (!road_segments.empty())
+        road_segments.pop_front();
     finished_id_buffer.push_back(id);
 }
 
@@ -287,31 +284,63 @@ string ControlCenter::get_current_road_segment() {
 
 string ControlCenter::get_current_road_segment_as_json() {
     string initial_string = "{\"Position\":\"";
-    string intermediate_string =  road_segments.front();
+    string intermediate_string = road_segments.front();
     string final_string = "\"}";
     return initial_string + intermediate_string + final_string;
 }
 
-void ControlCenter::set_drive_mission(list<string> node_list) {
-    string current_position = node_list.front();
-    node_list.pop_front();
+drive_instruction_t ControlCenter::get_current_drive_instruction() {
+    return drive_instructions.front();
+}
+
+void ControlCenter::set_drive_missions(list<string> target_list) {
+    string start_node = target_list.front();
+    target_list.pop_front();
+
+    // Reset position
     set_position(current_position);
-    for (string target_node : node_list) {
-        drive_instructions.push_back(instruction::stop);
-        vector<int> new_instructions = get_drive_instructions(target_node);
-        for (int instruction : new_instructions) {
-            drive_instructions.push_back(instruction);
+    drive_instructions.clear();
+    road_segments.clear();
+
+    for (string target_node : target_list) {
+        // Stop instruction between missions
+        add_drive_instruction(instruction::stop, "Auto");
+        road_segments.push_back("TODO");
+
+        // Solve
+        path_finder.solve(start_node, target_node);
+        vector<instruction::InstructionNumber> new_instructions = path_finder.get_drive_mission();
+
+        // Save path
+        for (instruction::InstructionNumber instruction : new_instructions)
+            add_drive_instruction(instruction, "Auto");
+        road_segments.splice(road_segments.end(), path_finder.get_road_segments());
+
+        start_node = target_node;
+
+        cout << target_node << ": ";
+        for (instruction::InstructionNumber inst : new_instructions) {
+            cout << inst << " ";
         }
+        cout << "\nsegments: ";
+        for (string segment : road_segments) {
+            cout << segment << " ";
+        }
+        cout << endl;
+    }
+
+    for (drive_instruction_t inst : drive_instructions) {
+        cout << "id: " << inst.id << " number: " << inst.number << endl;
     }
 }
 
-void ControlCenter::update_list_of_target_nodes_with_DriveMission(DriveMission dm) {
-    list<string> all_nodes_list = dm.get_target_nodes()
-    string name_of_current_position = all_nodes_list.front()
-    set_position(name_of_current_position);
-    all_nodes_list.pop_front();
-    target_node_name_list = all_nodes_list;
-}
+//void ControlCenter::update_list_of_target_nodes_with_DriveMission(DriveMission dm) {
+    //list<string> all_nodes_list = dm.get_target_nodes()
+    //string name_of_current_position = all_nodes_list.front()
+    //set_position(name_of_current_position);
+    //all_nodes_list.pop_front();
+    //target_node_name_list = all_nodes_list;
+//}
 
 int ControlCenter::calculate_speed() {
     switch (state) {

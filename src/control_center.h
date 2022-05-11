@@ -33,14 +33,12 @@ public:
             size_t stop_distance_filter_len=1,
             int consecutive_param=1,
             int high_count_param=0);
-    //void set_new_map(MapGraph *mapgraph);
-    void set_position(std::string current_position_name);
+    void set_position(std::string current_position);
     void update_map(json m);
-    std::vector<int> get_drive_instructions(std::string stop_node_name);
-    void finish_drive_mission();
-    void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
-    void update_list_of_target_nodes_with_DriveMission(DriveMission dm);
-    std::vector<int> get_drive_instructions_to_next_target_node();
+    //void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
+    //void update_list_of_target_nodes_with_DriveMission(DriveMission dm);
+    //std::vector<int> get_drive_instructions_to_next_target_node();
+    void set_drive_missions(std::list<std::string> target_list);
 
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
     void add_drive_instruction(drive_instruction_t drive_instruction);
@@ -60,6 +58,8 @@ public:
 
     std::string get_current_road_segment();
     std::string get_current_road_segment_as_json();
+
+    drive_instruction_t get_current_drive_instruction();
 
     /* Return 0 if no new instruction have been finished. */
     std::string get_finished_instruction_id();
@@ -100,7 +100,6 @@ private:
     bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
-    //bool have_stoped{true};
     int last_stop_distance{100};
     int far_stop_counter{0};
     int consecutive_decreasing_stop_distances{0};
@@ -110,9 +109,7 @@ private:
     std::list<std::string> road_segments{};
 
     PathFinder path_finder{};
-    std::string current_position_name{};
-    std::string current_target_name{};
-    std::list<std::string> target_node_name_list{};
+    std::string current_position{};
 };
 
 #endif // CONTROLCENTER_H

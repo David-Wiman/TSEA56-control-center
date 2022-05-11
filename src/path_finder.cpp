@@ -157,8 +157,7 @@ void PathFinder::update_map(json m) {
  * Set all non-starting-node-weights to UINT_MAX and as unvisited,
  * set starting node weight to 0. Returns starting node
  */
-MapNode *PathFinder::initiate_map_graph(string &start_node_name) {
-    reset_progress();
+MapNode* PathFinder::initiate_map_graph(string &start_node_name) {
     MapNode *start_node{};
     for (MapNode *node : nodes) {
         if (node->get_name() != start_node_name) {
@@ -173,7 +172,7 @@ MapNode *PathFinder::initiate_map_graph(string &start_node_name) {
     return start_node;
 }
 
-vector<int> PathFinder::get_drive_mission() {
+vector<instruction::InstructionNumber> PathFinder::get_drive_mission() {
     return drive_mission;
 }
 
@@ -212,19 +211,6 @@ void PathFinder::make_MapNode_list(json json_map) {
     nodes_vector = n_v;
 }
 
-/* Find current drive instruction */
-void PathFinder::reset_progress() {
-    nodes_passed = 0;
-}
-void PathFinder::done_with_drive_instruction() {
-    nodes_passed += 1;
-}
-int PathFinder::get_nodes_passed() {
-    return nodes_passed;
-}
-int PathFinder::get_current_drive_instruction() {
-    return drive_mission[nodes_passed];
-}
 /* Returns string with edge identification e.g. "A1K1" meaning from A1 to K1 */
 list<string> PathFinder::get_road_segments() {
     // Names of node just passed and node we're heading towards

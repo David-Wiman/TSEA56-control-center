@@ -12,6 +12,7 @@
 #ifndef DIJKSTRA_SOLVER_H
 #define DIJKSTRA_SOLVER_H
 
+#include "raspi_common.h"
 #include "map_node.h"
 #include "drive_mission_generator.h"
 
@@ -41,22 +42,17 @@ public:
     void solve(std::string start_node_name);
     void solve(std::string start_node_name, std::string stop_node_name);
     void find_path(MapNode *neighbour, std::string stop_node_name);
-    std::vector<int> get_drive_mission();
+    std::vector<instruction::InstructionNumber> get_drive_mission();
     void update_map(json m);
     void make_MapNode_list(json m);
 
-    void reset_progress();
-    void done_with_drive_instruction();
-    int get_nodes_passed();
-    int get_current_drive_instruction();
-    std::string get_road_segments();
+    std::list<std::string> get_road_segments();
 
 private:
     MapNode *initiate_map_graph(std::string &start_node_name);
     std::list<MapNode*> nodes{};
-    std::vector<int> drive_mission{};
+    std::vector<instruction::InstructionNumber> drive_mission{};
     std::vector<MapNode*> nodes_vector{};
-    int nodes_passed{};
 
 };
 
