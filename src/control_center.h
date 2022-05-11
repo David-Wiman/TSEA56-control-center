@@ -60,7 +60,6 @@ public:
 
     std::string get_current_road_segment();
     std::string get_current_road_segment_as_json();
-    int get_current_drive_instruction();
 
     /* Return 0 if no new instruction have been finished. */
     std::string get_finished_instruction_id();
@@ -108,6 +107,7 @@ private:
     enum stop_line::StopLine stop_line_mode{stop_line::close};
     int consecutive_param;
     int high_count_param;
+    std::list<std::string> road_segments{};
 
     PathFinder path_finder{};
     std::string current_position_name{};

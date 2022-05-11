@@ -35,14 +35,6 @@ vector<int> ControlCenter::get_drive_instructions(string stop_node_name) {
     return drive_instructions;
 }
 
-vector<int> ControlCenter::get_drive_instructions_to_next_target_node() {
-    current_target_name = target_node_name_list.front();
-    target_node_name_list.pop_front();
-    path_finder.solve(current_position_name, current_target_name);
-    vector<int> drive_instructions = path_finder.get_drive_mission();
-    return drive_instructions;
-}
-
 void ControlCenter::add_drive_instruction(drive_instruction_t drive_instruction) {
     drive_instructions.push_back(drive_instruction);
 }
@@ -285,36 +277,32 @@ void ControlCenter::finish_instruction() {
     Logger::log(INFO, __FILE__, "ControlCenter", "Finishing instruction");
     string id = drive_instructions.front().id;
     drive_instructions.pop_front();
+    road_segments.pop_front();
     finished_id_buffer.push_back(id);
-    path_finder.done_with_drive_instruction();
-}
-
-void ControlCenter::finish_drive_mission() {
-    current_position_name = current_target_name;
-    current_target_name = "";
-    add_drive_instruction(instruction::stop, "");
 }
 
 string ControlCenter::get_current_road_segment() {
-    return path_finder.get_current_road_segment();
+    return road_segments.front();
 }
 
 string ControlCenter::get_current_road_segment_as_json() {
     string initial_string = "{\"Position\":\"";
-    string intermediate_string =  path_finder.get_current_road_segment();
+    string intermediate_string =  road_segments.front();
     string final_string = "\"}";
     return initial_string + intermediate_string + final_string;
 }
 
-int ControlCenter::get_current_drive_instruction() {
-    return path_finder.get_current_drive_instruction();
-}
-
-void ControlCenter::update_list_of_target_nodes(list<string> t_n_m_l) {
-    string name_of_current_position = t_n_m_l.front();
-    set_position(name_of_current_position);
-    t_n_m_l.pop_front();
-    target_node_name_list = t_n_m_l;
+void ControlCenter::set_drive_mission(list<string> node_list) {
+    string current_position = node_list.front();
+    node_list.pop_front();
+    set_position(current_position);
+    for (string target_node : node_list) {
+        drive_instructions.push_back(instruction::stop);
+        vector<int> new_instructions = get_drive_instructions(target_node);
+        for (int instruction : new_instructions) {
+            drive_instructions.push_back(instruction);
+        }
+    }
 }
 
 void ControlCenter::update_list_of_target_nodes_with_DriveMission(DriveMission dm) {

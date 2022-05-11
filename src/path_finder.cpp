@@ -226,11 +226,15 @@ int PathFinder::get_current_drive_instruction() {
     return drive_mission[nodes_passed];
 }
 /* Returns string with edge identification e.g. "A1K1" meaning from A1 to K1 */
-string PathFinder::get_current_road_segment() {
+list<string> PathFinder::get_road_segments() {
     // Names of node just passed and node we're heading towards
-    string from = nodes_vector[nodes_passed]->get_name();
-    string to = nodes_vector[nodes_passed+1]->get_name();
-    return from + to;
+    list<string> road_segments{};
+    for (int i{0}; i < nodes_vector.size()-1; ++i) {
+        string from = nodes_vector[i]->get_name();
+        string to = nodes_vector[i+1]->get_name();
+        road_segments.push_back(from + to);
+    }
+    return road_segments;
 }
 
 /* Trace back from stop node to start node */
