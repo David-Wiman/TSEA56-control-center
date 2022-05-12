@@ -218,7 +218,7 @@ list<string> PathFinder::get_road_segments() {
     for (unsigned i{0}; i < nodes_vector.size() - 1; ++i) {
         string from = nodes_vector[i]->get_name();
         string to = nodes_vector[i+1]->get_name();
-        road_segments.push_back(from + "->" + to);
+        road_segments.push_back(from + to);
     }
     return road_segments;
 }

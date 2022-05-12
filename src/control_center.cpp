@@ -272,18 +272,13 @@ void ControlCenter::finish_instruction() {
     if (!road_segments.empty())
         road_segments.pop_front();
     finished_id_buffer.push_back(id);
-    road_segment_buffer.push_back(road_segments.front());
 }
 
 string ControlCenter::get_current_road_segment() {
-    if (road_segment_buffer.empty()) {
-        return "";
+    if (road_segments.empty()) {
+        return "none";
     } else {
-        string road_segment = road_segment_buffer.front();
-        road_segment_buffer.pop_front();
-        string initial_string = "{\"Position\":\"";
-        string final_string = "\"}";
-        return initial_string + road_segment + final_string;
+        return road_segments.front();
     }
 }
 
