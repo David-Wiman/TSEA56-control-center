@@ -53,11 +53,13 @@ public:
     }
 
     std::string get_current_road_segment();
-    std::string get_current_road_segment_as_json();
 
     drive_instruction_t get_current_drive_instruction();
 
-    /* Return 0 if no new instruction have been finished. */
+    /* Is there a finished instruction whoose id has not yet been extracted? */
+    bool finished_instruction();
+
+    /* Return "" if no new instruction have been finished. */
     std::string get_finished_instruction_id();
     enum state::ControlState get_state();
 
