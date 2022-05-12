@@ -215,7 +215,7 @@ void PathFinder::make_MapNode_list(json json_map) {
 list<string> PathFinder::get_road_segments() {
     // Names of node just passed and node we're heading towards
     list<string> road_segments{};
-    for (int i{0}; i < nodes_vector.size()-1; ++i) {
+    for (unsigned i{0}; i < nodes_vector.size() - 1; ++i) {
         string from = nodes_vector[i]->get_name();
         string to = nodes_vector[i+1]->get_name();
         road_segments.push_back(from + to);

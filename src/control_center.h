@@ -33,11 +33,7 @@ public:
             size_t stop_distance_filter_len=1,
             int consecutive_param=1,
             int high_count_param=0);
-    void set_position(std::string current_position);
     void update_map(json m);
-    //void update_list_of_target_nodes(std::list<std::string> target_node_name_list);
-    //void update_list_of_target_nodes_with_DriveMission(DriveMission dm);
-    //std::vector<int> get_drive_instructions_to_next_target_node();
     void set_drive_missions(std::list<std::string> target_list);
 
     void add_drive_instruction(enum instruction::InstructionNumber instr_number, std::string id);
@@ -109,7 +105,6 @@ private:
     std::list<std::string> road_segments{};
 
     PathFinder path_finder{};
-    std::string current_position{};
 };
 
 #endif // CONTROLCENTER_H
