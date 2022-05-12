@@ -103,6 +103,7 @@ private:
     int consecutive_param;
     int high_count_param;
     std::list<std::string> road_segments{};
+    std::list<std::string> road_segment_buffer{};
 
     PathFinder path_finder{};
 };
