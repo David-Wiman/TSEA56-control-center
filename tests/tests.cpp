@@ -283,22 +283,29 @@ TEST_CASE("Control Center") {
         CHECK(control_data.speed_ref == 0);
         CHECK(control_center.get_state() == state::stop_line);
     }
-    SECTION("Angle control") {
+    SECTION("Steering control") {
         Logger::init();
         ControlCenter control_center{};
         control_t control_data{};
-        int left_angle{};
-        int right_angle{};
+        int angle_left{};
+        int angle_right{};
+        int lateral_left{};
+        int lateral_right{};
 
         control_center.add_drive_instruction(instruction::forward, "1");
         control_center.add_drive_instruction(instruction::left, "2");
         control_center.add_drive_instruction(instruction::right, "3");
 
         // Straight road
-        left_angle = -1;
-        right_angle = 1;
-        control_data = control_center(200, 200, 0, left_angle, right_angle, 0, 0, 0);
-        CHECK(control_data.angle == (left_angle+right_angle)/2);
+        angle_left = -1;
+        angle_right = 1;
+        lateral_left = 3;
+        lateral_right = 1;
+        control_data = control_center(
+                200, 200, 0, angle_left, angle_right,
+                lateral_left, lateral_right, 0);
+        CHECK(control_data.angle == (angle_left+angle_right)/2);
+        CHECK(control_data.lateral_position == (lateral_left+lateral_right)/2);
 
         // Finish straight part, enter intersection (left turn)
         control_center(200, STOP_DISTANCE_MID, DEFAULT_SPEED, 0, 0, 0, 0, 0);
@@ -306,17 +313,29 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == state::intersection);
 
         // Left turn
-        left_angle = 20;
-        right_angle = -300;
-        control_data = control_center(200, STOP_DISTANCE_FAR, DEFAULT_SPEED, left_angle, right_angle, 0, 0, 0);
-        CHECK(control_data.angle == left_angle);
+        angle_left = 20;
+        angle_right = -300;
+        lateral_left = 3;
+        lateral_right = 20;
+        control_data = control_center(
+                200, STOP_DISTANCE_FAR, DEFAULT_SPEED,
+                angle_left, angle_right, lateral_left, lateral_right, 0);
+        CHECK(control_data.angle == angle_left);
+        CHECK(control_data.lateral_position == lateral_left);
 
         // Finish left turn, enter right turn
-        left_angle = 200;
-        right_angle = 4;
-        control_data = control_center(200, STOP_DISTANCE_MID, DEFAULT_SPEED, left_angle, right_angle, 0, 0, 0);
-        control_data = control_center(200, STOP_DISTANCE_CLOSE, DEFAULT_SPEED, left_angle, right_angle, 0, 0, 0);
-        CHECK(control_data.angle == right_angle);
+        angle_left = 200;
+        angle_right = 4;
+        lateral_left = 30;
+        lateral_right = 1;
+        control_data = control_center(
+                200, STOP_DISTANCE_MID, DEFAULT_SPEED,
+                angle_left, angle_right, lateral_left, lateral_right, 0);
+        control_data = control_center(
+                200, STOP_DISTANCE_CLOSE, DEFAULT_SPEED,
+                angle_left, angle_right, lateral_left, lateral_right, 0);
+        CHECK(control_data.angle == angle_right);
+        CHECK(control_data.lateral_position == lateral_right);
     }
     SECTION("Drive mode") {
         Logger::init();
@@ -345,6 +364,10 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_state() == state::intersection);
 
         // Intersection
+        control_data = control_center(200, 200, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
+        CHECK(control_data.regulation_mode == regulation_mode::auto_nominal);
+
+        image_processing_status_code = 1;
         control_data = control_center(200, 200, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
         CHECK(control_data.regulation_mode == regulation_mode::auto_critical);
     }

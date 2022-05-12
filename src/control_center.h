@@ -86,10 +86,13 @@ private:
     bool at_stop_line(int stop_distance);
 
     /* Call after update_state(). */
-    int calculate_speed();
+    int calculate_speed() const;
 
-    /* Call after update_state(). */
-    int calculate_angle(int left_angle, int right_angle);
+    /* Set angle and lateral position in control_data */
+    void choose_angle_and_lateral(
+            control_t *control_data, int angle_left, int angle_right,
+            int lateral_left, int lateral_right
+            ) const;
 
     Filter<int> obstacle_distance_filter;
     Filter<int> stop_distance_filter;

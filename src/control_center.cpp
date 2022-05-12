@@ -37,16 +37,16 @@ void ControlCenter::add_drive_instruction(instruction::InstructionNumber instruc
 
 control_t ControlCenter::operator()(
         int obstacle_distance, int stop_distance, int speed,
-        int left_angle, int right_angle, int lateral_left, int lateral_right, 
+        int angle_left, int angle_right, int lateral_left, int lateral_right,
         int image_processing_status_code) {
     stringstream ss;
     ss << "obstacle_distance=" << obstacle_distance
        << ", stop_distance=" << stop_distance
        << ", speed=" << speed
-       << ", angles=" << left_angle << "," << right_angle
+       << ", angles=" << angle_left << "," << angle_right
        << ", status_code=" << image_processing_status_code;
     Logger::log(DEBUG, __FILE__, "start", ss.str());
-    control_t control_data = {0, 0, regulation_mode::auto_nominal};
+    control_t control_data = {0, 0, 0, regulation_mode::auto_nominal};
 
     if (stop_distance == -1)
         stop_distance = 1000;
@@ -64,19 +64,20 @@ control_t ControlCenter::operator()(
     update_state(obstacle_distance, stop_distance, speed);
 
     // Drive mode
-    if ((state == state::intersection) || image_processing_status_code != 0) {
+    if (image_processing_status_code != 0) {
         control_data.regulation_mode = regulation_mode::auto_critical;
     } else {
         control_data.regulation_mode = regulation_mode::auto_nominal;
     }
 
-    control_data.angle = calculate_angle(left_angle, right_angle);
+    choose_angle_and_lateral(&control_data, angle_left, angle_right, lateral_left, lateral_right);
     control_data.speed_ref = calculate_speed();
 
     ss.str("");
     ss << "state=" << state
-       << ", Rangle=" << control_data.angle
-       << ", Rspeed=" << control_data.speed_ref
+       << ", angle=" << control_data.angle
+       << ", lateral=" << control_data.lateral_position
+       << ", speed_ref=" << control_data.speed_ref
        << ", drive mode=" << control_data.regulation_mode;
     Logger::log(DEBUG, __FILE__, "done", ss.str());
 
@@ -320,7 +321,7 @@ void ControlCenter::set_drive_missions(list<string> target_list) {
     }
 }
 
-int ControlCenter::calculate_speed() {
+int ControlCenter::calculate_speed() const {
     switch (state) {
         case state::normal:
             return DEFAULT_SPEED;
@@ -339,18 +340,26 @@ int ControlCenter::calculate_speed() {
     }
 }
 
-int ControlCenter::calculate_angle(int left_angle, int right_angle) {
+void ControlCenter::choose_angle_and_lateral(
+        control_t *control_data, int angle_left, int angle_right,
+        int lateral_left, int lateral_right) const {
     instruction::InstructionNumber instr{drive_instructions.front().number};
     switch (instr) {
         case instruction::forward:
-            return (left_angle + right_angle) / 2;
+            control_data->angle = (angle_left + angle_right) / 2;
+            control_data->lateral_position = (lateral_left + lateral_right) / 2;
+            break;
         case instruction::left:
-            return left_angle;
+            control_data->angle = angle_left;
+            control_data->lateral_position = lateral_left;
+            break;
         case instruction::right:
-            return right_angle;
+            control_data->angle = angle_right;
+            control_data->lateral_position = lateral_right;
+            break;
         default:
-            Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state while calculating angle");
-            return 0;
+            Logger::log(ERROR, __FILE__, "choose_angle_and_lageral", "Unknown state");
+            break;
     }
 }
 
