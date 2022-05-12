@@ -281,7 +281,9 @@ string ControlCenter::get_current_road_segment() {
     } else {
         string road_segment = road_segment_buffer.front();
         road_segment_buffer.pop_front();
-        return road_segment;
+        string initial_string = "{\"Position\":\"";
+        string final_string = "\"}";
+        return initial_string + road_segment + final_string;
     }
 }
 
