@@ -40,15 +40,17 @@ public:
     void add_drive_instruction(drive_instruction_t drive_instruction);
 
     /* The control center is callable. It must be called every program cycle. */
-    reference_t operator()(
+    control_t operator()(
             int obstacle_distance, int stop_distance, int speed,
-            int left_angle, int right_angle, int image_processing_status_code);
+            int angle_left, int angle_right, int lateral_left,
+            int lateral_right, int image_processing_status_code);
 
-    inline reference_t operator()(sensor_data_t sensor_data, image_proc_t image_proc_data) {
+    inline control_t operator()(sensor_data_t sensor_data, image_proc_t image_data) {
         return (*this)(
-                sensor_data.obstacle_distance, image_proc_data.stop_distance,
-                sensor_data.speed, image_proc_data.angle_left,
-                image_proc_data.angle_right, image_proc_data.status_code
+                sensor_data.obstacle_distance, image_data.stop_distance,
+                sensor_data.speed, image_data.angle_left,
+                image_data.angle_right, image_data.lateral_left,
+                image_data.lateral_right, image_data.status_code
         );
     }
 
