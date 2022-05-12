@@ -577,14 +577,14 @@ TEST_CASE("Control Center") {
         CHECK(ref.speed == DEFAULT_SPEED);
 
         CHECK(control_center.get_current_drive_instruction().number == instruction::forward);
-        CHECK(control_center.get_current_road_segment() == "A1K1");
+        CHECK(control_center.get_current_road_segment() == "A1->K1");
 
         // Drive to next line
         ref = control_center(OBST_DISTANCE_CLOSE+10, STOP_DISTANCE_MID, DEFAULT_SPEED, 0, 0, 0);
         ref = control_center(OBST_DISTANCE_CLOSE+10, STOP_DISTANCE_CLOSE, DEFAULT_SPEED, 0, 0, 0);
 
         CHECK(control_center.get_current_drive_instruction().number == instruction::forward);
-        CHECK(control_center.get_current_road_segment_as_json() == "{\"Position\":\"K1J1\"}");
+        CHECK(control_center.get_current_road_segment_as_json() == "{\"Position\":\"K1->J1\"}");
     }
 }
 
