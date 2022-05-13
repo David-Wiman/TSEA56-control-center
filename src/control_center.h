@@ -32,7 +32,8 @@ public:
             size_t obstacle_distance_filter_len=1,
             size_t stop_distance_filter_len=1,
             int consecutive_param=1,
-            int high_count_param=0);
+            int high_count_param=0,
+            unsigned status_code_threshold=1);
     void update_map(json m);
     void set_drive_missions(std::list<std::string> target_list);
 
@@ -90,6 +91,9 @@ private:
     /* Call after update_state(). */
     int calculate_speed() const;
 
+    /* Set regulation mode in control_data */
+    void choose_regulation_mode(control_t *control_data, int image_processing_status_code);
+
     /* Set angle and lateral position in control_data */
     void choose_angle_and_lateral(
             control_t *control_data, int angle_left, int angle_right,
@@ -105,10 +109,13 @@ private:
     std::list<std::string> finished_id_buffer{};
     int last_stop_distance{100};
     int far_stop_counter{0};
-    int consecutive_decreasing_stop_distances{0};
-    enum stop_line::StopLine stop_line_mode{stop_line::close};
     int consecutive_param;
     int high_count_param;
+    int consecutive_decreasing_stop_distances{0};
+    unsigned consecutive_0_status_codes{INT_MAX};
+    unsigned status_code_threshold;
+    int last_image_status_code{0};
+    enum stop_line::StopLine stop_line_mode{stop_line::close};
     std::list<std::string> road_segments{};
 
     PathFinder path_finder{};

@@ -12,11 +12,13 @@ using namespace std;
 ControlCenter::ControlCenter(size_t obstacle_distance_filter_len,
                              size_t stop_distance_filter_len,
                              int consecutive_param,
-                             int high_count_param)
+                             int high_count_param,
+                             unsigned status_code_threshold)
 : obstacle_distance_filter{obstacle_distance_filter_len, 100},
   stop_distance_filter{stop_distance_filter_len, 0},
   consecutive_param{consecutive_param},
-  high_count_param{high_count_param} {
+  high_count_param{high_count_param},
+  status_code_threshold{status_code_threshold} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
 
@@ -63,13 +65,7 @@ control_t ControlCenter::operator()(
 
     update_state(obstacle_distance, stop_distance, speed);
 
-    // Drive mode
-    if (image_processing_status_code != 0) {
-        control_data.regulation_mode = regulation_mode::auto_critical;
-    } else {
-        control_data.regulation_mode = regulation_mode::auto_nominal;
-    }
-
+    choose_regulation_mode(&control_data, image_processing_status_code);
     choose_angle_and_lateral(&control_data, angle_left, angle_right, lateral_left, lateral_right);
     control_data.speed_ref = calculate_speed();
 
@@ -336,6 +332,21 @@ int ControlCenter::calculate_speed() const {
         default:
             Logger::log(ERROR, __FILE__, "ControlCenter", "Unknown state while calculating speed");
             return 0;
+    }
+}
+
+void ControlCenter::choose_regulation_mode(control_t *control_data, int status_code) {
+    // If status code is 0 and it has been for a while, use regulation mode 
+    // nominal. Otherwise critical.
+    if (status_code == 0) {
+        ++consecutive_0_status_codes;
+    } else {
+        consecutive_0_status_codes = 0;
+    }
+    if (consecutive_0_status_codes >= status_code_threshold) {
+        control_data->regulation_mode = regulation_mode::auto_nominal;
+    } else {
+        control_data->regulation_mode = regulation_mode::auto_critical;
     }
 }
 

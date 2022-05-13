@@ -339,7 +339,10 @@ TEST_CASE("Control Center") {
     }
     SECTION("Drive mode") {
         Logger::init();
-        ControlCenter control_center{};
+
+        // Everything default, except for status_code_threshold=2
+        ControlCenter control_center{1, 1, 1, 0, 2};
+
         control_t control_data{};
         int image_processing_status_code{0};
 
@@ -355,9 +358,14 @@ TEST_CASE("Control Center") {
         control_data = control_center(200, 200, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
         CHECK(control_data.regulation_mode == regulation_mode::auto_critical);
 
+        // Good again, but don't change regulation mode until 2 good in a row
+        image_processing_status_code = 0;
+        control_data = control_center(200, 200, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
+        CHECK(control_data.regulation_mode == regulation_mode::auto_critical);
+        control_data = control_center(200, 200, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
+        CHECK(control_data.regulation_mode == regulation_mode::auto_nominal);
 
         // Finish straight part, enter intersection
-        image_processing_status_code = 0;
         control_data = control_center(200, STOP_DISTANCE_FAR, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
         control_center(200, STOP_DISTANCE_MID, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
         control_center(200, STOP_DISTANCE_CLOSE, DEFAULT_SPEED, 0, 0, 0, 0, image_processing_status_code);
