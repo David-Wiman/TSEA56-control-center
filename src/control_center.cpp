@@ -278,7 +278,7 @@ void ControlCenter::finish_instruction() {
 
 string ControlCenter::get_current_road_segment() {
     if (road_segments.empty()) {
-        return "none";
+        return "end";
     } else {
         return road_segments.front();
     }
