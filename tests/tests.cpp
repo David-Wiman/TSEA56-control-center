@@ -590,6 +590,7 @@ TEST_CASE("Control Center") {
         control_center.set_drive_missions({"A1", "K2", "H1"});
 
         CHECK(control_center.get_current_drive_instruction().number == instruction::stop);
+        CHECK(!control_center.finished_instruction());
         CHECK(control_center.get_current_road_segment() == "A1");
 
         control_t control_data{};
@@ -600,6 +601,8 @@ TEST_CASE("Control Center") {
         CHECK(control_data.speed_ref == DEFAULT_SPEED);
 
         CHECK(control_center.get_current_drive_instruction().number == instruction::forward);
+        CHECK(control_center.finished_instruction());
+        CHECK(control_center.get_finished_instruction_id() == "A1");
         CHECK(control_center.get_current_road_segment() == "A1->K1");
 
         // Drive to next line
@@ -607,7 +610,8 @@ TEST_CASE("Control Center") {
         control_data = control_center(OBST_DISTANCE_CLOSE+10, STOP_DISTANCE_CLOSE, DEFAULT_SPEED, 0, 0, 0, 0, 0);
 
         CHECK(control_center.get_current_drive_instruction().number == instruction::forward);
-        CHECK(control_center.get_current_road_segment_as_json() == "{\"Position\":\"K1->J1\"}");
+        CHECK(control_center.get_current_road_segment() == "K1->J1");
+        CHECK(control_center.get_finished_instruction_id() == "A1->K1");
     }
 }
 

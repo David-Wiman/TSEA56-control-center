@@ -284,13 +284,6 @@ string ControlCenter::get_current_road_segment() {
     }
 }
 
-string ControlCenter::get_current_road_segment_as_json() {
-    string initial_string = "{\"Position\":\"";
-    string intermediate_string = road_segments.front();
-    string final_string = "\"}";
-    return initial_string + intermediate_string + final_string;
-}
-
 drive_instruction_t ControlCenter::get_current_drive_instruction() {
     return drive_instructions.front();
 }
@@ -305,17 +298,23 @@ void ControlCenter::set_drive_missions(list<string> target_list) {
 
     for (string target_node : target_list) {
         // Stop instruction between missions
-        add_drive_instruction(instruction::stop, "Auto");
+        add_drive_instruction(instruction::stop, start_node);
         road_segments.push_back(start_node);
 
         // Solve
         path_finder.solve(start_node, target_node);
         vector<instruction::InstructionNumber> new_instructions = path_finder.get_drive_mission();
+        list<string> new_segments = path_finder.get_road_segments();
 
         // Save path
-        for (instruction::InstructionNumber instruction : new_instructions)
-            add_drive_instruction(instruction, "Auto");
-        road_segments.splice(road_segments.end(), path_finder.get_road_segments());
+        auto inst_itr = new_instructions.begin();
+        auto segm_itr = new_segments.begin();
+        while (inst_itr != new_instructions.end()) {
+            add_drive_instruction(*inst_itr, *segm_itr);
+            ++inst_itr;
+            ++segm_itr;
+        }
+        road_segments.splice(road_segments.end(), new_segments);
 
         start_node = target_node;
     }
@@ -361,6 +360,10 @@ void ControlCenter::choose_angle_and_lateral(
             Logger::log(ERROR, __FILE__, "choose_angle_and_lageral", "Unknown state");
             break;
     }
+}
+
+bool ControlCenter::finished_instruction() {
+    return !finished_id_buffer.empty();
 }
 
 string ControlCenter::get_finished_instruction_id() {
