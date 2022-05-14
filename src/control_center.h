@@ -17,6 +17,7 @@
 #define STOP_DISTANCE_MID 50
 #define STOP_DISTANCE_FAR 70
 #define OBST_DISTANCE_CLOSE 90
+#define EXPECTED_ANGLE_THESHOLD 20
 
 namespace state {
     enum ControlState {normal, intersection, stopping, blocked, stop_line, waiting};
@@ -94,11 +95,13 @@ private:
     /* Set regulation mode in control_data */
     void choose_regulation_mode(control_t *control_data, int image_processing_status_code);
 
-    /* Set angle and lateral position in control_data */
-    void choose_angle_and_lateral(
-            control_t *control_data, int angle_left, int angle_right,
-            int lateral_left, int lateral_right
-            ) const;
+    int calculate_angle(int angle_left, int angle_right);
+
+    inline bool is_expected(int angle) {
+        return abs(angle - last_angle) < EXPECTED_ANGLE_THESHOLD;
+    }
+
+    int calculate_lateral_position(int lateral_left, int lateral_right) const;
 
     Filter<int> obstacle_distance_filter;
     Filter<int> stop_distance_filter;
@@ -115,6 +118,7 @@ private:
     unsigned consecutive_0_status_codes{INT_MAX};
     unsigned status_code_threshold;
     int last_image_status_code{0};
+    int last_angle{0};
     enum stop_line::StopLine stop_line_mode{stop_line::close};
     std::list<std::string> road_segments{};
 

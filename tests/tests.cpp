@@ -586,6 +586,84 @@ TEST_CASE("Control Center") {
         }
         CHECK(completed_instructions == 2);
     }
+
+    SECTION("Robust angles") {
+
+        /* Try to prevent the angle from changing unexpectedly. Perhaps from a
+         * false detection in the image processor.
+         */
+
+        ControlCenter control_center{};
+        control_t control_data{};
+
+        sensor_data_t sensor_data{};
+        sensor_data.obstacle_distance = 0;
+        sensor_data.speed = DEFAULT_SPEED;
+
+        image_proc_t image_data{};
+        image_data.stop_distance = STOP_DISTANCE_FAR;
+        image_data.angle_left = 0;
+        image_data.angle_right = 0;
+        image_data.status_code = 0;
+
+
+        // Normal road. If angles looks good: use both (average),
+        // if one looks ok but other does not: use the good one.
+        control_center.add_drive_instruction(instruction::forward, "1");
+        image_data.angle_left = 10;
+        image_data.angle_right = 12;
+        control_data = control_center(sensor_data, image_data);
+        image_data.angle_left = 22;
+        image_data.angle_right = 24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 23);
+
+        // Bad left angle
+        image_data.angle_left = -22;
+        image_data.angle_right = 24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 24);
+
+        // Bad left angle, slightly worse right angle. Use right
+        image_data.angle_left = -22;
+        image_data.angle_right = 12;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 12);
+
+        // Enter intersection. Drive right
+        control_center.add_drive_instruction(instruction::right, "2");
+        image_data.stop_distance = STOP_DISTANCE_MID;
+        image_data.angle_left = 22;
+        image_data.angle_right = 22;
+        control_data = control_center(sensor_data, image_data);
+        image_data.stop_distance = STOP_DISTANCE_CLOSE;
+        control_data = control_center(sensor_data, image_data);
+
+        // Good data, use right angle
+        image_data.angle_left = 22;
+        image_data.angle_right = 24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 24);
+
+        // Bad left data, shuldn't mater
+        image_data.angle_left = -22;
+        image_data.angle_right = 24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 24);
+
+        // Bad right data, but left data is plausable. Use left angle.
+        image_data.angle_left = 22;
+        image_data.angle_right = -24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == 22);
+
+        // Both bad. Use right angle.
+        image_data.angle_left = -22;
+        image_data.angle_right = -24;
+        control_data = control_center(sensor_data, image_data);
+        CHECK(control_data.angle == -24);
+    }
+
     SECTION("Dijkstra from ControlCenter with list of drive missions") {
         Logger::init();
         // Make map

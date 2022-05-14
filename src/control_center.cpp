@@ -66,7 +66,8 @@ control_t ControlCenter::operator()(
     update_state(obstacle_distance, stop_distance, speed);
 
     choose_regulation_mode(&control_data, image_processing_status_code);
-    choose_angle_and_lateral(&control_data, angle_left, angle_right, lateral_left, lateral_right);
+    control_data.angle = calculate_angle(angle_left, angle_right);
+    control_data.lateral_position = calculate_lateral_position(lateral_left, lateral_right);
     control_data.speed_ref = calculate_speed();
 
     ss.str("");
@@ -336,7 +337,7 @@ int ControlCenter::calculate_speed() const {
 }
 
 void ControlCenter::choose_regulation_mode(control_t *control_data, int status_code) {
-    // If status code is 0 and it has been for a while, use regulation mode 
+    // If status code is 0 and it has been for a while, use regulation mode
     // nominal. Otherwise critical.
     if (status_code == 0) {
         ++consecutive_0_status_codes;
@@ -350,27 +351,68 @@ void ControlCenter::choose_regulation_mode(control_t *control_data, int status_c
     }
 }
 
-void ControlCenter::choose_angle_and_lateral(
-        control_t *control_data, int angle_left, int angle_right,
-        int lateral_left, int lateral_right) const {
+int ControlCenter::calculate_lateral_position(int lateral_left, int lateral_right) const {
     instruction::InstructionNumber instr{drive_instructions.front().number};
     switch (instr) {
         case instruction::forward:
-            control_data->angle = (angle_left + angle_right) / 2;
-            control_data->lateral_position = (lateral_left + lateral_right) / 2;
+            return (lateral_left + lateral_right) / 2;
+        case instruction::left:
+            return lateral_left;
+        case instruction::right:
+            return lateral_right;
+        default:
+            Logger::log(ERROR, __FILE__, "choose_angle_and_lageral", "Unknown state");
+            return 0;
+    }
+}
+
+int ControlCenter::calculate_angle(int angle_left, int angle_right) {
+    /* Calculates what angle to use. The basic idea is to use an average if the
+     * car should go straight but use the one to left/right if the car should
+     * follow that line (in an intersection). However sometimes the data is
+     * bad and the angle changes abruptly. Often only one angle is bad so we
+     * then use the other one and hope to recover. */
+    int angle{};
+    instruction::InstructionNumber instr{drive_instructions.front().number};
+    switch (instr) {
+        case instruction::forward:
+            if (is_expected(angle_left) && is_expected(angle_right)) {
+                angle = (angle_left + angle_right) / 2;
+            } else if (is_expected(angle_left)) {
+                angle = angle_left;
+            } else if (is_expected(angle_right)) {
+                angle = angle_right;
+            } else {
+                // We could not recover
+                angle = (angle_left + angle_right) / 2;
+            }
             break;
         case instruction::left:
-            control_data->angle = angle_left;
-            control_data->lateral_position = lateral_left;
+            if (is_expected(angle_left)) {
+                angle = angle_left;
+            } else if (is_expected(angle_right)) {
+                angle = angle_right;
+            } else {
+                // We could not recover
+                angle = angle_left;
+            }
             break;
         case instruction::right:
-            control_data->angle = angle_right;
-            control_data->lateral_position = lateral_right;
+            if (is_expected(angle_right)) {
+                angle = angle_right;
+            } else if (is_expected(angle_left)) {
+                angle = angle_left;
+            } else {
+                // We could not recover
+                angle = angle_right;
+            }
             break;
         default:
             Logger::log(ERROR, __FILE__, "choose_angle_and_lageral", "Unknown state");
             break;
     }
+    last_angle = angle;
+    return angle;
 }
 
 bool ControlCenter::finished_instruction() {
