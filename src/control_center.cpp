@@ -16,8 +16,7 @@ ControlCenter::ControlCenter(size_t obstacle_distance_filter_len,
                              unsigned status_code_threshold)
 : obstacle_distance_filter{obstacle_distance_filter_len, 100},
   stop_distance_filter{stop_distance_filter_len, 0},
-  consecutive_param{consecutive_param},
-  high_count_param{high_count_param},
+  stop_line_detector{consecutive_param, high_count_param},
   status_code_threshold{status_code_threshold} {
     Logger::log(INFO, __FILE__, "ControlCenter", "Initialize ControlCenter");
 }
@@ -107,7 +106,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance, int s
                 Logger::log(INFO, __FILE__, "Update state", "Path blocked, stopping");
                 state = state::stopping;
                 stop_reason = state::blocked;
-            } else if (at_stop_line(stop_distance)) {
+            } else if (stop_line_detector.at_line(stop_distance)) {
                 // At node
                 if (drive_instructions.size() > 1) {
                     finish_instruction();
@@ -133,7 +132,7 @@ void ControlCenter::update_state(int obstacle_distance, int stop_distance, int s
             if (drive_instructions.front().number == instruction::stop) {
                 finish_instruction();
             }
-            if (at_stop_line(stop_distance)) {
+            if (stop_line_detector.at_line(stop_distance)) {
                 Logger::log(ERROR, __FILE__, "Update state", "Still at stop line");
             }
             set_new_state(speed);
@@ -202,66 +201,6 @@ void ControlCenter::set_new_state(int speed) {
         Logger::log(INFO, __FILE__, "Set new state", state_name);
         state = new_state;
     }
-}
-
-bool ControlCenter::at_stop_line(int stop_distance) {
-    if ((stop_distance < STOP_DISTANCE_FAR)
-        && (stop_distance <= last_stop_distance + 5)) {
-        ++consecutive_decreasing_stop_distances;
-    } else {
-        consecutive_decreasing_stop_distances = 0;
-    }
-    last_stop_distance = stop_distance;
-
-    bool retval{false};
-
-    if (stop_distance >= STOP_DISTANCE_FAR) {
-        // Next stop line is very far away
-        ++far_stop_counter;
-        if (far_stop_counter > high_count_param) {
-            stop_line_mode = stop_line::far;
-            far_stop_counter = 0;
-        }
-    } else {
-        far_stop_counter = 0;
-    }
-
-    switch (stop_line_mode) {
-        case stop_line::far:
-            if ((stop_distance <= STOP_DISTANCE_MID)
-                && (stop_distance > STOP_DISTANCE_CLOSE)
-                && consecutive_decreasing_stop_distances >= consecutive_param) {
-                stop_line_mode = stop_line::mid;
-            }
-            retval = false;
-            break;
-        case stop_line::mid:
-            if (stop_distance <= STOP_DISTANCE_CLOSE) {
-                stop_line_mode = stop_line::close;
-                retval = true;
-                break;
-            }
-            retval = false;
-            break;
-        case stop_line::close:
-            retval = false;
-            if ((stop_distance > STOP_DISTANCE_CLOSE) &&
-                (consecutive_decreasing_stop_distances >= consecutive_param)) {
-                stop_line_mode = stop_line::mid;
-            }
-            break;
-    }
-
-    // Log
-    array<string, 3> mode_names{"close", "mid", "far"};
-    stringstream ss{};
-    ss << "stop_distance=" << stop_distance
-       << ", consec=" << consecutive_decreasing_stop_distances
-       << ", far_count=" << far_stop_counter
-       << ", mode=" << mode_names[stop_line_mode];
-    Logger::log(DEBUG, __FILE__, "at_stop_line", ss.str());
-
-    return retval;
 }
 
 void ControlCenter::finish_instruction() {

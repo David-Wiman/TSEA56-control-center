@@ -6,25 +6,15 @@
 #include "drive_mission_generator.h"
 #include "raspi_common.h"
 #include "filter.h"
+#include "line_detector.h"
+#include "constants.h"
 
 #include <string>
 #include <list>
 #include <vector>
 
-#define DEFAULT_SPEED 500
-#define INTERSECTION_SPEED 400
-#define STOP_DISTANCE_CLOSE 30
-#define STOP_DISTANCE_MID 50
-#define STOP_DISTANCE_FAR 70
-#define OBST_DISTANCE_CLOSE 90
-#define EXPECTED_ANGLE_THESHOLD 20
-
 namespace state {
     enum ControlState {normal, intersection, stopping, blocked, stop_line, waiting};
-}
-
-namespace stop_line {
-    enum StopLine {close, mid, far};
 }
 
 class ControlCenter {
@@ -83,12 +73,6 @@ private:
         return obstacle_distance <= OBST_DISTANCE_CLOSE;
     }
 
-    /* Return true if the car is at a stop line (which it have not been at
-     * before), otherwise return false.
-     *
-     * Note, this method must be called exactly once per program cycle. */
-    bool at_stop_line(int stop_distance);
-
     /* Call after update_state(). */
     int calculate_speed() const;
 
@@ -110,19 +94,13 @@ private:
     bool finish_when_stopped{false};
     std::list<drive_instruction_t> drive_instructions{};
     std::list<std::string> finished_id_buffer{};
-    int last_stop_distance{100};
-    int far_stop_counter{0};
-    int consecutive_param;
-    int high_count_param;
-    int consecutive_decreasing_stop_distances{0};
     unsigned consecutive_0_status_codes{INT_MAX};
-    unsigned status_code_threshold;
     int last_image_status_code{0};
     int last_angle{0};
-    enum stop_line::StopLine stop_line_mode{stop_line::close};
     std::list<std::string> road_segments{};
-
+    LineDetector stop_line_detector;
     PathFinder path_finder{};
+    unsigned status_code_threshold;
 };
 
 #endif // CONTROLCENTER_H

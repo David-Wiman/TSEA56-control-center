@@ -514,6 +514,13 @@ TEST_CASE("Control Center") {
         control_center.add_drive_instruction(instruction::forward, "1");
         control_center.add_drive_instruction(instruction::forward, "1");
         control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
+        control_center.add_drive_instruction(instruction::forward, "1");
 
         sensor_data_t sensor_data{};
         sensor_data.obstacle_distance = 0;
@@ -540,16 +547,18 @@ TEST_CASE("Control Center") {
         CHECK(completed_instructions == 1);
 
         completed_instructions = 0;
+        Logger::log(INFO, __FILE__, "START", "");
         vector<int> stop_distances2{
             20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, -1, -1, -1, -1, -1, -1,
             // Bad data between lines
             10, -1, 13, 12, 11, 10, -1, -1, 13, -1, -1, -1, -1, -1, 10, 12, 22,
             -1, -1, 99, 45, 11, -1, -1, -1, 13, -1, -1, -1, -1, -1, 10, 13, 11,
-            10, -1, 13, 12, 11, 10, 10, 10, 10, 10, -1, -1, -1, -1, 10, 12, 22,
-            // Bad data when detecting lines
+            10, -1, 13, 12, 11, -1, 10, 10, 10, 10, -1, -1, -1, -1, 10, 12, 22,
+            // Bad data when detecting line
             50, 49, -1, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34,
             33, 32, -1, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20
         };
+
 
         for (int stop_distance : stop_distances2) {
             image_data.stop_distance = stop_distance;
@@ -558,6 +567,7 @@ TEST_CASE("Control Center") {
                 completed_instructions++;
         }
         CHECK(completed_instructions == 1);
+        Logger::log(INFO, __FILE__, "END", "");
 
         // Real drive data
         vector<int> stop_distances3{86, 86, 86, 86, 87, 86, 88, 87, 86, 86, 86, 86, 86, 86, 85, 86, 86, 86, 86, 86, 87, 86, 86, 86, 87, 86, 86, 87, 85, 86, 86, 86, 87, 88, 87, 85, 86, 85, 86, 85, 86, 86, 86, 86, 86, 86, 87, 85, 86, 86, 88, 86, 87, 85, 87, 86, 86, 86, 86, 85, 86, 86, 85, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 87, 85, 85, 84, 83, 83, 81, 81, 80, 77, 76, 75, 73, 73, 70, 68, 67, 65, 62, 60, 57, 55, 52, 49, 47, 44, 42, 39, 36, 34, 31, 29, 26, 24, 21, 19, 16, 14, 12, 10, 9, -1, -1, -1, -1, -1, -1, -1};
@@ -585,6 +595,20 @@ TEST_CASE("Control Center") {
                 completed_instructions++;
         }
         CHECK(completed_instructions == 2);
+
+
+        // Very late line
+        vector<int> stop_distances5{
+            -1, -1, -1, -1, -1, 32, 30, 27, 25, 22, 19, 17, 15, 12, 11
+        };
+        completed_instructions = 0;
+        for (int stop_distance : stop_distances5) {
+            image_data.stop_distance = stop_distance;
+            control_data = control_center(sensor_data, image_data);
+            if (control_center.get_finished_instruction_id() == "1")
+                completed_instructions++;
+        }
+        CHECK(completed_instructions == 1);
     }
 
     SECTION("Robust angles") {
