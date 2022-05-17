@@ -93,58 +93,62 @@ void PathFinder::solve(string start_node_name) {
 void PathFinder::solve(string start_node_name, string stop_node_name) {
     // Inititate map
     MapNode *active_node = initiate_map_graph(start_node_name);
-    active_node->set_parent_node(nullptr);
+    if (active_node != nullptr && !nodes.empty()) {
+        active_node->set_parent_node(nullptr);
 
-    // Place start node as first to visit
-    std::list<MapNode*> nodes_to_visit{active_node};
+        // Place start node as first to visit
+        std::list<MapNode*> nodes_to_visit{active_node};
 
-    // Set new starting-node and remove from list
-    while (!(nodes_to_visit.empty())) {
-        // Make sure the node with the lowest weight is searched first
-        nodes_to_visit.sort(Comparator());
-        active_node = nodes_to_visit.front();
-        nodes_to_visit.pop_front();
-        active_node->set_visited(true);
+        // Set new starting-node and remove from list
+        while (!(nodes_to_visit.empty())) {
+            // Make sure the node with the lowest weight is searched first
+            nodes_to_visit.sort(Comparator());
+            active_node = nodes_to_visit.front();
+            nodes_to_visit.pop_front();
+            active_node->set_visited(true);
 
-        // Update left neighbour's weight if bigger than active nodes weight + edge weight
-        MapNode *left_neighbour = active_node->get_left().node;
-        if (left_neighbour != nullptr) {
-            if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
-                left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
-                left_neighbour->set_parent_node(active_node);
-                active_node->set_child_node(left_neighbour);
-                if (left_neighbour->get_name() == stop_node_name) {
-                    find_path(left_neighbour, stop_node_name);
-                    break;
+            // Update left neighbour's weight if bigger than active nodes weight + edge weight
+            MapNode *left_neighbour = active_node->get_left().node;
+            if (left_neighbour != nullptr) {
+                if (left_neighbour->get_weight() >= active_node->get_weight() + active_node->get_left().weight) {
+                    left_neighbour->set_weight(active_node->get_weight() + active_node->get_left().weight);
+                    left_neighbour->set_parent_node(active_node);
+                    active_node->set_child_node(left_neighbour);
+                    if (left_neighbour->get_name() == stop_node_name) {
+                        find_path(left_neighbour, stop_node_name);
+                        break;
+                    }
+                }
+            }
+
+            // Update right neighbour's weight if bigger than active nodes weight + edge weight
+            MapNode *right_neighbour = active_node->get_right().node;
+            if (right_neighbour != nullptr) {
+                if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
+                    right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
+                    right_neighbour->set_parent_node(active_node);
+                    active_node->set_child_node(right_neighbour);
+                    if (right_neighbour->get_name() == stop_node_name) {
+                        find_path(right_neighbour, stop_node_name);
+                        break;
+                    }
+                }
+            }
+
+            // Add nodes to nodes_to_visit list if they are not already visited
+            if (left_neighbour != nullptr) {
+                if (!(left_neighbour->is_visited())) {
+                        nodes_to_visit.push_back(left_neighbour);
+                }
+            }
+            if (right_neighbour != nullptr) {
+                if (!(right_neighbour->is_visited())) {
+                    nodes_to_visit.push_back(right_neighbour);
                 }
             }
         }
-
-        // Update right neighbour's weight if bigger than active nodes weight + edge weight
-        MapNode *right_neighbour = active_node->get_right().node;
-        if (right_neighbour != nullptr) {
-            if (right_neighbour->get_weight() >= active_node->get_weight() + active_node->get_right().weight) {
-                right_neighbour->set_weight(active_node->get_weight() + active_node->get_right().weight);
-                right_neighbour->set_parent_node(active_node);
-                active_node->set_child_node(right_neighbour);
-                if (right_neighbour->get_name() == stop_node_name) {
-                    find_path(right_neighbour, stop_node_name);
-                    break;
-                }
-            }
-        }
-
-        // Add nodes to nodes_to_visit list if they are not already visited
-        if (left_neighbour != nullptr) {
-            if (!(left_neighbour->is_visited())) {
-                    nodes_to_visit.push_back(left_neighbour);
-            }
-        }
-        if (right_neighbour != nullptr) {
-            if (!(right_neighbour->is_visited())) {
-                nodes_to_visit.push_back(right_neighbour);
-            }
-        }
+    } else {
+        Logger::log(WARNING, __FILE__, "solve", "No Map before DriveMission");
     }
 }
 
@@ -215,10 +219,18 @@ void PathFinder::make_MapNode_list(json json_map) {
 list<string> PathFinder::get_road_segments() {
     // Names of node just passed and node we're heading towards
     list<string> road_segments{};
-    for (unsigned i{0}; i < nodes_vector.size() - 1; ++i) {
-        string from = nodes_vector[i]->get_name();
-        string to = nodes_vector[i+1]->get_name();
-        road_segments.push_back(from + "->" + to);
+    if (!nodes_vector.empty()) {
+        for (unsigned i{0}; i < nodes_vector.size() - 1; ++i) {
+            if (nodes_vector.size() > 1) {
+                if (nodes_vector[i] != nullptr || nodes_vector[i+1] != nullptr) {
+                    string from = nodes_vector[i]->get_name();
+                    string to = nodes_vector[i+1]->get_name();
+                    road_segments.push_back(from + "->" + to);
+                } else {
+                    Logger::log(WARNING, __FILE__, "get_road_segments", "nodes_vector[i] is nullptr");
+                }
+            }
+        }
     }
     return road_segments;
 }

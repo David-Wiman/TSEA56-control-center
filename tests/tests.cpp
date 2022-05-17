@@ -723,5 +723,12 @@ TEST_CASE("Control Center") {
         CHECK(control_center.get_current_road_segment() == "K1->J1");
         CHECK(control_center.get_finished_instruction_id() == "A1->K1");
     }
+    SECTION("Dijkstra without map") {
+        Logger::init();
+        // Make control_center
+        ControlCenter control_center{};
+        // Prep for solve
+        control_center.set_drive_missions({"A1", "K2", "H1"});
+    }
 }
 
