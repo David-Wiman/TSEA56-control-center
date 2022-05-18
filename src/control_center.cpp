@@ -347,7 +347,7 @@ int ControlCenter::calculate_angle(int angle_left, int angle_right) {
             }
             break;
         default:
-            Logger::log(ERROR, __FILE__, "choose_angle_and_lageral", "Unknown state");
+            Logger::log(ERROR, __FILE__, "calculate_angle", "Unknown instruction");
             break;
     }
     last_angle = angle;
